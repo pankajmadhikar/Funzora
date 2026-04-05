@@ -1,7 +1,7 @@
 import { authService } from "./authService";
 
-// const BASE_URL = 'http://localhost:8080/api/v1';
-export const BASE_URL = "https://api.rgswholesale.in/api/v1";
+const BASE_URL = 'http://localhost:8080/api/v1';
+// export const BASE_URL = "https://api.rgswholesale.in/api/v1";
 
 const handleResponse = async (response) => {
   const data = await response.json();
