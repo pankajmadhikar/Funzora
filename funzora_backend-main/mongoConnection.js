@@ -3,7 +3,7 @@ const config = require('./app/config');
 
 // MongoDB Connection Setup
 // mongoose.connect(`mongodb+srv://kshirsagars234:123123123@shubham.eiovjmm.mongodb.net/onlinesales`)
-const uri = 'mongodb+srv://funzora26_db_user:uD1ntDUGtak90Y7H@cluster0.ob7zcad.mongodb.net/?appName=Cluster0';
+const uri = `mongodb+srv://${process.env.MONGO_USERNAME}:${process.env.MONGO_PASSWORD}@cluster0.ob7zcad.mongodb.net/?appName=Cluster0`;
 console.log(uri); // Log the URI to ensure it's correct
 mongoose
   .connect(uri)
