@@ -96,8 +96,8 @@ export default function StorefrontHome() {
           </div>
         )}
 
-        {/* ── Parent reviews + trust ribbon ── */}
-        <div className="bb-section">
+        {/* ── Parent reviews (footer trust ribbon follows in App shell) ── */}
+        <div className="bb-section bb-section--before-footer">
           <ReviewSection />
         </div>
       </div>

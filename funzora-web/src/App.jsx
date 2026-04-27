@@ -85,7 +85,8 @@ function AppShell() {
           />
         )}
 
-        <Box component="main" sx={{ flex: 1 }}>
+        {/* No flex-grow: avoids a tall empty band inside main above the footer */}
+        <Box component="main" sx={{ flex: '0 1 auto', width: '100%' }}>
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />

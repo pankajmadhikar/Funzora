@@ -63,37 +63,6 @@ const REVIEWS = [
   },
 ];
 
-const TRUST_RIBBON = [
-  {
-    key: 'safe',
-    icon: '🛡️',
-    title: '100% Safe Materials',
-    desc: 'Non-toxic, child-safe & BIS certified toys',
-    iconClass: 'reviews-trust-icon--green',
-  },
-  {
-    key: 'delivery',
-    icon: '🚚',
-    title: 'Pan India Delivery',
-    desc: 'Fast & reliable delivery across India',
-    iconClass: 'reviews-trust-icon--red',
-  },
-  {
-    key: 'returns',
-    icon: '🔄',
-    title: '7-Day Easy Returns',
-    desc: 'Hassle-free returns within 7 days',
-    iconClass: 'reviews-trust-icon--purple',
-  },
-  {
-    key: 'pay',
-    icon: '🔒',
-    title: 'Secure Payments',
-    desc: 'Your payments are safe and protected',
-    iconClass: 'reviews-trust-icon--orange',
-  },
-];
-
 export default function ReviewSection() {
   return (
     <section className="reviews-container" aria-labelledby="reviews-heading">
@@ -143,18 +112,6 @@ export default function ReviewSection() {
       >
         View all reviews on Google →
       </a>
-
-      <div className="reviews-trust-bar">
-        {TRUST_RIBBON.map((b) => (
-          <div className="reviews-trust-item" key={b.key}>
-            <div className={`reviews-trust-icon ${b.iconClass}`}>{b.icon}</div>
-            <div className="reviews-trust-copy">
-              <strong>{b.title}</strong>
-              <p>{b.desc}</p>
-            </div>
-          </div>
-        ))}
-      </div>
     </section>
   );
 }
