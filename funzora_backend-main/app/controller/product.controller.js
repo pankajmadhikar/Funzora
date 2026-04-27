@@ -4,12 +4,30 @@ const Cart = require("../models/cart.model");
 const Order = require("../models/order.model");
 
 exports.addProduct = asyncHandler(async (req, res) => {
-  const products = req.body.products;
+  let products = req.body?.products;
 
-  // Iterate through products to calculate the actualAmount before saving
+  // Allow sample JSON shape: { "exampleBulkInsert": { "products": [...] } }
+  if (!products && req.body?.exampleBulkInsert?.products) {
+    products = req.body.exampleBulkInsert.products;
+  }
+
+  // Raw array body (some clients POST [] directly)
+  if (!products && Array.isArray(req.body)) {
+    products = req.body;
+  }
+
+  if (!Array.isArray(products) || products.length === 0) {
+    return res.status(400).json({
+      success: false,
+      message:
+        'Body must include a non-empty "products" array. Example: { "products": [ { "name", "mrp", "price", "quantity", "availableQuantity", ... } ] }. Do not send only "requiredFieldsPerProduct" or the whole sample file without the "products" wrapper.',
+    });
+  }
+
   products.forEach((product) => {
-    product.actualAmount =
-      product.price - product.price * (product.discountPercentage / 100);
+    const pct = Number(product.discountPercentage) || 0;
+    product.discountPercentage = pct;
+    product.actualAmount = product.price - product.price * (pct / 100);
   });
 
   const createdProducts = await productModel.insertMany(products);

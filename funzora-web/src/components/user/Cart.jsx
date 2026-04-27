@@ -1,90 +1,47 @@
-import { useState, useEffect } from "react";
-import {
-  Container,
-  Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Button,
-  IconButton,
-  Box,
-  CircularProgress,
-  Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogContentText,
-  DialogActions,
-} from "@mui/material";
-import {
-  Add as AddIcon,
-  Remove as RemoveIcon,
-  Delete as DeleteIcon,
-} from "@mui/icons-material";
-import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { apiService } from "../../services/apiService";
-import { toast } from "react-hot-toast";
-import { setCartItems } from "../../store/slices/cartSlice";
+import { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { CircularProgress } from '@mui/material';
+import { apiService } from '../../services/apiService';
+import { toast } from 'react-hot-toast';
+import { setCartItems } from '../../store/slices/cartSlice';
+import { enrichProduct } from '../../utils/enrichProduct';
+import { formatPrice } from '../../utils/formatPrice';
+import { FREE_SHIP_AT, SHIPPING_FLAT } from '../../config/toyStore';
 
 const Cart = () => {
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
   const [cartData, setCartData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updating, setUpdating] = useState(false);
-  const [itemErrors, setItemErrors] = useState({});
-  const [checkoutLoading, setCheckoutLoading] = useState(false);
-  const [successModalOpen, setSuccessModalOpen] = useState(false);
-  const dispatch = useDispatch();
 
-  useEffect(() => {
-    fetchCartItems();
-  }, []);
-
-  const fetchCartItems = async () => {
+  const fetchCartItems = useCallback(async () => {
     try {
       setLoading(true);
-
-
       const cartResponse = await apiService.getCartItems();
-      console.log("cartResponse", cartResponse)
-      // Update Redux store with new cart data
-      if (cartResponse?.data) {
-        dispatch(setCartItems(cartResponse?.data));
-      }
+      if (cartResponse?.data) dispatch(setCartItems(cartResponse.data));
       setCartData(cartResponse);
       setError(null);
-    } catch (error) {
-      console.log("Error fetching cart fetchCartItems from carts:", error);
+    } catch (err) {
       dispatch(setCartItems({ items: [] }));
-      setError(error.message || "Failed to load cart items");
+      setError(err.message || 'Failed to load cart');
     } finally {
       setLoading(false);
     }
-  };
+  }, [dispatch]);
+
+  useEffect(() => { fetchCartItems(); }, [fetchCartItems]);
 
   const handleUpdateQuantity = async (item, action) => {
     try {
       setUpdating(true);
-      setItemErrors((prev) => ({ ...prev, [item._id]: null }));
-
       await apiService.updateCartItem(item.productId._id, action);
       await fetchCartItems();
-      toast.success("Cart updated successfully");
-    } catch (error) {
-      console.error("Error updating cart:", error);
-      // Store error for specific item
-      setItemErrors((prev) => ({
-        ...prev,
-        [item._id]: error.message,
-      }));
-      toast.error(error.message || "Failed to update cart");
+      toast.success('Cart updated');
+    } catch (err) {
+      toast.error(err.message || 'Failed to update');
     } finally {
       setUpdating(false);
     }
@@ -93,262 +50,194 @@ const Cart = () => {
   const handleRemoveItem = async (item) => {
     try {
       setUpdating(true);
-      const response = await apiService.removeCartItem(item?.productId?._id);
-      console.log("response", response)
-      await fetchCartItems(); // Refresh cart items
-      toast.success("Item removed from cart");
-    } catch (error) {
-      console.error("Error removing item:", error);
-      toast.error(error.message || "Failed to remove item");
+      await apiService.removeCartItem(item?.productId?._id);
+      await fetchCartItems();
+      toast.success('Item removed');
+    } catch (err) {
+      toast.error(err.message || 'Failed to remove');
     } finally {
       setUpdating(false);
     }
   };
 
-  const handleCheckout = async () => {
-    console.log("handleCheckout pressed ")
-    console.log("successModalOpen pressed ", successModalOpen)
-    try {
-      setCheckoutLoading(true);
-      await apiService.checkout();
-      // Refresh cart after successful checkout
-      // setSuccessModalOpen(true);
-
-      fetchCartItems();
-      toast.success("Order Placed Successfully!");
-
-    } catch (error) {
-      console.error("Checkout failed:", error);
-      toast.error(error.message || "Checkout failed. Please try again.");
-    } finally {
-      setCheckoutLoading(false);
-      setSuccessModalOpen(true);
-    }
-  };
-
   if (loading) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="60vh"
-      >
-        <CircularProgress />
-      </Box>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
+        <CircularProgress sx={{ color: 'var(--color-primary)' }} />
+      </div>
     );
   }
 
   if (error) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4 }}>
-        <Alert severity="error">{error}</Alert>
-      </Container>
+      <div className="bb-page">
+        <div className="empty-state">
+          <span className="empty-state-icon">⚠️</span>
+          <span className="empty-state-title">Something went wrong</span>
+          <span className="empty-state-sub">{error}</span>
+          <button className="btn btn--primary" onClick={fetchCartItems}>Try again</button>
+        </div>
+      </div>
     );
   }
 
-  // Get cart items from the nested structure
   const cartItems = cartData?.data?.items || [];
-  console.log("Cart Items:", cartItems); // Debug log
+  const subtotal = cartItems.reduce((sum, item) => sum + (item?.productId?.price || 0) * (item?.quantity || 0), 0);
+  const toFree = Math.max(0, FREE_SHIP_AT - subtotal);
+  const ship = subtotal >= FREE_SHIP_AT ? 0 : SHIPPING_FLAT;
+  const total = subtotal + ship;
 
-  const total = cartItems.reduce(
-    (sum, item) => sum + item?.productId?.price * item?.quantity,
-    0
-  );
+  if (!cartItems || cartItems.length === 0) {
+    return (
+      <div className="bb-page">
+        <h1 className="text-title bb-head" style={{ marginBottom: 'var(--space-xl)' }}>Shopping Cart</h1>
+        <div className="empty-state" style={{ padding: 'var(--space-3xl) var(--space-lg)' }}>
+          <span style={{ fontSize: 64 }}>🛒</span>
+          <span className="empty-state-title">Your bag is empty</span>
+          <span className="empty-state-sub">Explore toys under ₹100</span>
+          <button className="btn btn--primary" onClick={() => navigate('/shop')}>Shop now →</button>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <Container maxWidth="lg" sx={{ py: 4 }}>
-      <Typography variant="h4" gutterBottom>
-        Shopping Cart ({cartItems.length} items)
-      </Typography>
+    <div className="bb-page">
+      <h1 className="text-title bb-head" style={{ marginBottom: 'var(--space-xl)' }}>
+        Shopping Cart <span style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-lg)' }}>({cartItems.length})</span>
+      </h1>
 
-      {!cartItems || cartItems.length === 0 ? (
-        <Paper sx={{ p: 4, textAlign: "center" }}>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            Your cart is empty
-          </Typography>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={() => navigate("/")}
+      <div className="cart-page-grid">
+        {/* Left: Cart items */}
+        <div className="cart-page-items">
+          {cartItems.map((item) => {
+            const raw = item.productId;
+            if (!raw) return null;
+            const ep = enrichProduct(raw);
+            const u = ep?._ui;
+            return (
+              <div key={item._id} className="cart-page-row">
+                <div className="cart-page-thumb" style={{ background: u?.grad || 'var(--color-bg)' }}>
+                  {raw.images?.[0] ? (
+                    <img src={raw.images[0]} alt={raw.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                  ) : (
+                    <span style={{ fontSize: 28 }}>{u?.emoji || '🎁'}</span>
+                  )}
+                </div>
+
+                <div className="cart-page-info">
+                  <span className="text-heading" style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {raw.name}
+                  </span>
+                  <span className="text-label" style={{ marginTop: 2 }}>
+                    Age {u?.age || '3+'} · {u?.catMeta?.label || 'Toy'}
+                  </span>
+                  {/* Mobile price */}
+                  <span className="cart-page-price-mobile text-price" style={{ marginTop: 4 }}>
+                    {formatPrice(raw.price * item.quantity)}
+                  </span>
+                </div>
+
+                <div className="cart-page-qty">
+                  <button
+                    className="qty-btn"
+                    disabled={updating || item.quantity <= 1}
+                    onClick={() => handleUpdateQuantity(item, 'decrease')}
+                  >−</button>
+                  <span style={{ fontWeight: 800, minWidth: 20, textAlign: 'center', fontSize: 'var(--font-size-base)' }}>
+                    {item.quantity}
+                  </span>
+                  <button
+                    className="qty-btn"
+                    disabled={updating}
+                    onClick={() => handleUpdateQuantity(item, 'increase')}
+                    style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
+                  >+</button>
+                </div>
+
+                <span className="cart-page-price text-price">
+                  {formatPrice(raw.price * item.quantity)}
+                </span>
+
+                <button
+                  className="cart-page-delete"
+                  disabled={updating}
+                  onClick={() => handleRemoveItem(item)}
+                >🗑</button>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Right: Order summary */}
+        <div className="cart-summary-card">
+          <h2 className="bb-head" style={{ fontSize: 'var(--font-size-md)', color: 'var(--color-text-primary)', marginBottom: 'var(--space-lg)' }}>
+            Order Summary
+          </h2>
+
+          {/* Item lines */}
+          <div style={{ marginBottom: 'var(--space-md)' }}>
+            {cartItems.map((item) => {
+              const raw = item.productId;
+              if (!raw) return null;
+              const ep = enrichProduct(raw);
+              return (
+                <div key={item._id} className="cart-summary-line">
+                  <span className="text-body" style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {ep?._ui?.emoji} {raw.name}
+                  </span>
+                  <span style={{ fontWeight: 800, flexShrink: 0 }}>{formatPrice(raw.price * item.quantity)}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="cart-summary-divider" />
+
+          {/* Shipping nudge */}
+          {subtotal > 0 && toFree > 0 && (
+            <div className="shipping-nudge">
+              <div className="shipping-nudge-text">🚚 Add {formatPrice(toFree)} more for FREE shipping!</div>
+              <div className="shipping-nudge-bar">
+                <div className="shipping-nudge-fill" style={{ width: `${Math.min(100, (subtotal / FREE_SHIP_AT) * 100)}%` }} />
+              </div>
+            </div>
+          )}
+
+          <div className="cart-summary-line">
+            <span className="text-body">Subtotal</span>
+            <span style={{ fontWeight: 800 }}>{formatPrice(subtotal)}</span>
+          </div>
+          <div className="cart-summary-line">
+            <span className="text-body">Shipping</span>
+            <span style={{ fontWeight: 800, color: ship === 0 ? 'var(--color-success)' : 'var(--color-text-primary)' }}>
+              {ship === 0 ? 'FREE' : formatPrice(ship)}
+            </span>
+          </div>
+
+          <div className="cart-summary-divider" />
+
+          <div className="cart-summary-line" style={{ marginBottom: 'var(--space-lg)' }}>
+            <span className="bb-head" style={{ fontSize: 'var(--font-size-lg)', color: 'var(--color-text-primary)' }}>Total</span>
+            <span className="bb-head text-price" style={{ fontSize: 'var(--font-size-lg)' }}>{formatPrice(total)}</span>
+          </div>
+
+          <button
+            className="btn btn--primary btn--full cart-checkout-btn"
+            disabled={cartItems.length === 0}
+            onClick={() => navigate('/checkout')}
           >
-            Continue Shopping
-          </Button>
-        </Paper>
-      ) : (
-        <>
-          <TableContainer component={Paper}>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Product</TableCell>
-                  <TableCell align="right">Price</TableCell>
-                  <TableCell align="center">Quantity</TableCell>
-                  <TableCell align="right">Total</TableCell>
-                  <TableCell align="center">Actions</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {cartItems?.map((item) => (
-                  <TableRow key={item?._id}>
-                    <TableCell component="th" scope="row">
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <img
-                          src={item?.productId?.images[0] || "https://via.placeholder.com/50"}
-                          alt={item?.productId?.name}
-                          style={{
-                            width: 50,
-                            height: 50,
-                            marginRight: 16,
-                            objectFit: "cover",
-                          }}
-                        />
-                        {item?.productId?.name}
-                      </Box>
-                    </TableCell>
-                    <TableCell align="right">
-                      ₹{item?.productId?.price?.toFixed(2)}
-                    </TableCell>
-                    <TableCell align="center">
-                      <Box>
-                        <Box
-                          sx={{
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
-                          }}
-                        >
-                          <IconButton
-                            size="small"
-                            onClick={() =>
-                              handleUpdateQuantity(item, "decrease")
-                            }
-                            disabled={updating || item.quantity <= 1}
-                          >
-                            <RemoveIcon />
-                          </IconButton>
-                          <Typography component="span" sx={{ mx: 2 }}>
-                            {item.quantity}
-                          </Typography>
-                          <IconButton
-                            size="small"
-                            onClick={() =>
-                              handleUpdateQuantity(item, "increase")
-                            }
-                          >
-                            <AddIcon />
-                          </IconButton>
-                        </Box>
-                        {itemErrors[item._id] && (
-                          <Typography
-                            color="error"
-                            variant="caption"
-                            sx={{ display: "block", mt: 1 }}
-                          >
-                            {itemErrors[item._id]}
-                          </Typography>
-                        )}
-                      </Box>
-                    </TableCell>
-                    <TableCell align="right">
-                      ₹{(item?.productId?.price * item.quantity).toFixed(2)}
-                    </TableCell>
-                    <TableCell align="center">
-                      <IconButton
-                        color="error"
-                        onClick={() => handleRemoveItem(item)}
-                        disabled={updating}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+            Proceed to Checkout
+          </button>
 
-          <Box
-            sx={{
-              mt: 4,
-              p: 3,
-              bgcolor: "background.paper",
-              borderRadius: 1,
-              boxShadow: 1,
-            }}
-          >
-            <Typography variant="h6" gutterBottom>
-              Order Summary
-            </Typography>
-            <Box
-              sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}
-            >
-              <Typography>Subtotal:</Typography>
-              <Typography>₹{total.toFixed(2)}</Typography>
-            </Box>
-            <Box
-              sx={{ display: "flex", justifyContent: "space-between", mb: 2 }}
-            >
-
-            </Box>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                mb: 2,
-                pt: 2,
-                borderTop: "1px solid",
-                borderColor: "divider",
-              }}
-            >
-              <Typography variant="h6">Total:</Typography>
-              <Typography variant="h6">₹{(total).toFixed(2)}</Typography>
-            </Box>
-            <Box sx={{ mt: 4, display: "flex", justifyContent: "flex-end" }}>
-              <Button
-                variant="contained"
-                color="primary"
-                size="large"
-                disabled={cartItems.length === 0 || checkoutLoading}
-                onClick={handleCheckout}
-              >
-                {checkoutLoading ? "Processing..." : "Proceed to Checkout"}
-              </Button>
-            </Box>
-          </Box>
-
-
-
-
-          <Dialog
-            open={successModalOpen}
-            onClose={() => setSuccessModalOpen(false)}
-          >
-            <DialogTitle>Order Placed Successfully!</DialogTitle>
-            <DialogContent>
-              <DialogContentText>
-                Thank you for your order. Our admin team will contact you
-                shortly regarding your order details and delivery information.
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button
-                onClick={() => setSuccessModalOpen(false)}
-                variant="contained"
-                color="primary"
-              >
-                OK
-              </Button>
-            </DialogActions>
-          </Dialog>
-
-
-        </>
-      )}
-
-      {/* Success Modal */}
-
-    </Container>
+          <div className="cart-trust-line">
+            <span>🔒 Secure checkout</span>
+            <span>·</span>
+            <span>🔄 7-day returns</span>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

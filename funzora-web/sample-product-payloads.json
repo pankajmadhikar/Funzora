@@ -1,0 +1,57 @@
+{
+  "_comment": "Use with POST /api/v1/products body: { \"products\": [ ... ] }. Required fields match your Product model today. Optional fields are read by funzora-web enrichProduct() if you add them to mongoose schema (otherwise Mongo strips them).",
+  "requiredFieldsPerProduct": {
+    "name": "Magic Kinetic Sand",
+    "description": "Squeeze, mould and sculpt endlessly! Non-toxic kinetic sand.",
+    "specification": "Non-toxic BPA-free\nNever dries out\nEasy cleanup\n500g pack",
+    "price": 79,
+    "mrp": 149,
+    "discountPercentage": 47,
+    "category": "Sensory Play",
+    "subCategory": "Age 3+",
+    "quantity": 20,
+    "availableQuantity": 20,
+    "images": ["https://example.com/sand.jpg"]
+  },
+  "optionalUiFieldsToAddToMongooseSchema": {
+    "displayEmoji": "🏖️",
+    "ageLabel": "3+",
+    "isHot": true,
+    "isNew": false,
+    "rating": 4.8,
+    "reviewCount": 89,
+    "features": ["Non-toxic BPA-free", "Never dries out", "Easy cleanup", "500g pack"],
+    "shopCategoryId": "sensory"
+  },
+  "shopCategoryIdAllowedValues": ["all", "outdoor", "creative", "sensory", "puzzles", "collect", "learning"],
+  "exampleBulkInsert": {
+    "products": [
+      {
+        "name": "Bubble Wand Super Kit",
+        "description": "Giant wands and solution for outdoor bubble fun.",
+        "specification": "3 wands\n200ml solution\nNon-toxic",
+        "price": 39,
+        "mrp": 99,
+        "discountPercentage": 61,
+        "category": "Outdoor & Active",
+        "subCategory": "Age 2+",
+        "quantity": 30,
+        "availableQuantity": 30,
+        "images": []
+      },
+      {
+        "name": "Mini Jigsaw Puzzle 48pc",
+        "description": "Forest animals 48-piece puzzle.",
+        "specification": "48 pieces\nThick cardboard",
+        "price": 59,
+        "mrp": 119,
+        "discountPercentage": 50,
+        "category": "Puzzles & Games",
+        "subCategory": "Age 4+",
+        "quantity": 25,
+        "availableQuantity": 25,
+        "images": []
+      }
+    ]
+  }
+}

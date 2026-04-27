@@ -1,189 +1,197 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import {
-  Container,
-  Paper,
-  Typography,
-  Box,
-  Avatar,
-  Divider,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Chip,
-  CircularProgress,
-  Alert,
-} from '@mui/material';
-import Grid2 from '@mui/material/Grid2';
+import { useSelector, useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { CircularProgress } from '@mui/material';
 import { apiService } from '../../services/apiService';
 import { formatPrice } from '../../utils/formatPrice';
+import { logout } from '../../redux/slices/authSlice';
+import { toast } from 'react-hot-toast';
+
+const NAV_ITEMS = [
+  { id: 'orders', icon: '📦', label: 'My Orders' },
+  { id: 'settings', icon: '⚙', label: 'Account Settings' },
+];
 
 function Profile() {
-  const { user } = useSelector(state => state.auth);
+  const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('orders');
 
   useEffect(() => {
-    const fetchOrders = async () => {
+    (async () => {
       try {
         setLoading(true);
         const response = await apiService.getUserOrders();
         setOrders(response.data || []);
-      } catch (error) {
-        console.error('Error fetching orders:', error);
-        setError('Failed to load order history');
+        setError(null);
+      } catch (err) {
+        setError(err.message || 'Failed to load orders');
       } finally {
         setLoading(false);
       }
-    };
-
-    fetchOrders();
+    })();
   }, []);
 
-  const getStatusColor = (status) => {
-    switch (status.toLowerCase()) {
-      case 'processing':
-        return 'warning';
-      case 'delivered':
-        return 'success';
-      case 'cancelled':
-        return 'error';
-      default:
-        return 'default';
-    }
+  const handleLogout = () => {
+    dispatch(logout());
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    toast.success('Logged out');
+    navigate('/login');
   };
 
-  if (loading) {
-    return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
-        <CircularProgress />
-      </Box>
-    );
-  }
+  const getStatusStyle = (status) => {
+    const s = (status || '').toLowerCase();
+    if (s === 'delivered') return { background: '#EAFAF1', color: 'var(--color-success)', border: '1px solid #D5F5E3' };
+    if (s === 'cancelled') return { background: '#FEF2F2', color: '#EF4444', border: '1px solid #FECACA' };
+    return { background: '#FEF9EC', color: 'var(--color-warning)', border: '1px solid #FDE68A' };
+  };
+
+  const initials = `${(user?.firstname || user?.name || 'U')[0]}${(user?.lastname || '')[0] || ''}`.toUpperCase();
+  const displayName = user?.firstname ? `${user.firstname} ${user.lastname || ''}`.trim() : (user?.name || 'User');
+  const memberSince = new Date(user?.createdAt || Date.now()).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
 
   return (
-    <Container maxWidth="md">
-      {/* User Info Section */}
-      <Paper elevation={3} sx={{ p: 4, mt: 4, mb: 4 }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
-          <Avatar
-            sx={{
-              width: 120,
-              height: 120,
-              mb: 2,
-              bgcolor: 'primary.main',
-              fontSize: '3rem',
-            }}
-          >
-            {user?.firstname?.[0]}{user?.lastname?.[0]}
-          </Avatar>
-          <Typography variant="h4" gutterBottom>
-            {user?.firstname} {user?.lastname}
-          </Typography>
-          <Typography variant="body1" color="text.secondary">
-            {user?.email}
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            {user?.phone}
-          </Typography>
-        </Box>
+    <div className="bb-page">
+      <h1 className="text-title bb-head" style={{ marginBottom: 'var(--space-xl)' }}>My Account</h1>
 
-        <Divider sx={{ my: 3 }} />
+      <div className="profile-grid">
+        {/* Left sidebar */}
+        <div className="profile-sidebar">
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
+            <div className="profile-avatar">{initials}</div>
+            <div className="text-heading" style={{ fontSize: 'var(--font-size-md)', marginTop: 'var(--space-md)' }}>{displayName}</div>
+            <div className="text-label" style={{ marginTop: 2 }}>{user?.email || ''}</div>
+            {user?.phone && <div className="text-label" style={{ marginTop: 2 }}>{user.phone}</div>}
+          </div>
 
-        <Grid2 container spacing={3}>
-          <Grid2 xs={12} sm={6}>
-            <Typography variant="subtitle1" color="text.secondary">
-              Account Type
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 2 }}>
-              {user?.role === 'admin' ? 'Administrator' : 'Customer'}
-            </Typography>
-          </Grid2>
-          <Grid2 xs={12} sm={6}>
-            <Typography variant="subtitle1" color="text.secondary">
-              Member Since
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 2 }}>
-              {new Date(user?.createdAt || Date.now()).toLocaleDateString()}
-            </Typography>
-          </Grid2>
-        </Grid2>
-      </Paper>
+          <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 'var(--space-md)' }}>
+            {/* Desktop nav */}
+            <div className="profile-nav-desktop">
+              {NAV_ITEMS.map((item) => (
+                <button
+                  key={item.id}
+                  className={`profile-nav-item${activeTab === item.id ? ' active' : ''}`}
+                  onClick={() => setActiveTab(item.id)}
+                >
+                  <span>{item.icon}</span>
+                  <span>{item.label}</span>
+                </button>
+              ))}
+              <button className="profile-nav-item profile-nav-item--danger" onClick={handleLogout}>
+                <span>🚪</span>
+                <span>Sign Out</span>
+              </button>
+            </div>
+          </div>
+        </div>
 
-      {/* Order History Section */}
-      <Paper elevation={3} sx={{ p: 4 }}>
-        <Typography variant="h5" gutterBottom>
-          Order History
-        </Typography>
+        {/* Mobile nav strip */}
+        <div className="profile-nav-mobile">
+          {NAV_ITEMS.map((item) => (
+            <button
+              key={item.id}
+              className={`profile-nav-mobile-item${activeTab === item.id ? ' active' : ''}`}
+              onClick={() => setActiveTab(item.id)}
+            >
+              <span>{item.icon}</span>
+              <span>{item.label}</span>
+            </button>
+          ))}
+        </div>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-        
-        {orders.length === 0 ? (
-          <Typography color="text.secondary" align="center" sx={{ py: 4 }}>
-            No orders found
-          </Typography>
-        ) : (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Order ID</TableCell>
-                  <TableCell>Date</TableCell>
-                  <TableCell>Items</TableCell>
-                  <TableCell align="right">Total</TableCell>
-                  <TableCell>Status</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {orders.map((order) => (
-                  <TableRow key={order._id} hover>
-                    <TableCell>{order._id}</TableCell>
-                    <TableCell>
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </TableCell>
-                    <TableCell>
-                      <Box sx={{ maxWidth: 300 }}>
-                        {order.items.map((item, index) => (
-                          <Typography
-                            key={item._id}
-                            variant="body2"
-                            noWrap
-                            component="span"
-                            sx={{ display: 'inline-block', mr: 1 }}
-                          >
-                            {item.product.name}
-                            {index < order.items.length - 1 ? ', ' : ''}
-                          </Typography>
+        {/* Right content */}
+        <div className="profile-content">
+          {activeTab === 'orders' && (
+            <div>
+              <h2 className="bb-head" style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-lg)' }}>Order History</h2>
+
+              {loading ? (
+                <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-2xl)' }}>
+                  <CircularProgress sx={{ color: 'var(--color-primary)' }} />
+                </div>
+              ) : error || orders.length === 0 ? (
+                <div className="empty-state">
+                  <span className="empty-state-icon">📦</span>
+                  <span className="empty-state-title">{error ? 'Could not load orders' : 'No orders yet'}</span>
+                  <span className="empty-state-sub">
+                    {error ? 'Please try again later.' : 'Your placed orders will appear here'}
+                  </span>
+                  <button className="btn btn--primary" onClick={() => navigate('/shop')}>Start Shopping →</button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
+                  {orders.map((order) => (
+                    <div key={order._id} className="order-card">
+                      <div className="order-card-header">
+                        <div>
+                          <span className="text-label">ORDER ID</span>
+                          <span className="text-heading" style={{ display: 'block', marginTop: 2 }}>
+                            #{String(order._id).slice(-8)}
+                          </span>
+                        </div>
+                        <div style={{ textAlign: 'right' }}>
+                          <span className="text-label">{new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
+                          <span className="order-status-badge" style={getStatusStyle(order.status)}>
+                            {order.status}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="order-card-items">
+                        {order.items?.map((it, idx) => (
+                          <span key={it._id || idx} className="text-body" style={{ fontSize: 'var(--font-size-sm)' }}>
+                            {it.product?.name || 'Item'}{idx < order.items.length - 1 ? ', ' : ''}
+                          </span>
                         ))}
-                      </Box>
-                    </TableCell>
-                    <TableCell align="right">
-                      {formatPrice(order.totalAmount)}
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={order.status}
-                        color={getStatusColor(order.status)}
-                        size="small"
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
-      </Paper>
-    </Container>
+                      </div>
+                      <div className="order-card-footer">
+                        <span className="text-price" style={{ fontSize: 'var(--font-size-md)' }}>{formatPrice(order.totalAmount)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === 'settings' && (
+            <div>
+              <h2 className="bb-head" style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-lg)' }}>Account Settings</h2>
+
+              <div className="account-info-grid">
+                <div className="account-info-item">
+                  <div className="account-info-label">Account Type</div>
+                  <div className="account-info-value">{user?.role === 'admin' ? 'Administrator' : 'Customer'}</div>
+                </div>
+                <div className="account-info-item">
+                  <div className="account-info-label">Member Since</div>
+                  <div className="account-info-value">{memberSince}</div>
+                </div>
+                <div className="account-info-item">
+                  <div className="account-info-label">Email</div>
+                  <div className="account-info-value">{user?.email || '—'}</div>
+                </div>
+                <div className="account-info-item">
+                  <div className="account-info-label">Phone</div>
+                  <div className="account-info-value">{user?.phone || '—'}</div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: 'var(--space-xl)' }}>
+                <button className="btn btn--outline" style={{ color: '#EF4444', borderColor: '#EF4444' }} onClick={handleLogout}>
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }
 
-export default Profile; 
+export default Profile;
