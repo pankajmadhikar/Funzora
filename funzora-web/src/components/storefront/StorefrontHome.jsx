@@ -1,16 +1,17 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { Box, Typography, Button, CircularProgress } from '@mui/material';
+import { Box, CircularProgress } from '@mui/material';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { toast } from 'react-hot-toast';
 import { apiService } from '../../services/apiService';
 import { setCartItems } from '../../store/slices/cartSlice';
 import { setRefreshCartItems } from '../../redux/slices/authSlice';
-import { enrichProducts, enrichProduct, discPct } from '../../utils/enrichProduct';
+import { enrichProducts, enrichProduct } from '../../utils/enrichProduct';
 import { TOY_CATS } from '../../config/toyStore';
 import { TOY_COMBOS, resolveComboProducts } from '../../config/toyCombos';
 import { formatPrice } from '../../utils/formatPrice';
 import ToyProductCard from './ToyProductCard';
+import HeroSection from './HeroSection';
 
 const TICKER_ITEMS = [
   '🎁 All toys under ₹100',
@@ -54,7 +55,6 @@ export default function StorefrontHome() {
   const dispatch = useDispatch();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [hs, setHs] = useState(0);
   const [comboBusy, setComboBusy] = useState(null);
 
   useEffect(() => {
@@ -73,25 +73,6 @@ export default function StorefrontHome() {
   }, []);
 
   const enriched = useMemo(() => enrichProducts(products), [products]);
-
-  const heroSlides = useMemo(() => {
-    const sorted = [...enriched].sort((a, b) => b._ui.discountPct - a._ui.discountPct);
-    const picks = sorted.slice(0, 3);
-    if (picks.length === 0) return [];
-    const accents = ['#FF6B35', '#2ECC71', '#7B4FFF'];
-    const bgs = [
-      'linear-gradient(135deg,#FFF3CD 0%,#FFE0B2 100%)',
-      'linear-gradient(135deg,#E8F8F1 0%,#D5F5E3 100%)',
-      'linear-gradient(135deg,#F3EFFF 0%,#E8E4FF 100%)',
-    ];
-    return picks.map((p, i) => ({ p, bg: bgs[i % bgs.length], accent: accents[i % accents.length] }));
-  }, [enriched]);
-
-  useEffect(() => {
-    if (heroSlides.length === 0) return undefined;
-    const t = setInterval(() => setHs((s) => (s + 1) % heroSlides.length), 4000);
-    return () => clearInterval(t);
-  }, [heroSlides.length]);
 
   const featured = useMemo(() => enriched.filter((p) => p._ui.hot || p._ui.isNew).slice(0, 8), [enriched]);
   const under50 = useMemo(() => enriched.filter((p) => p.price <= 50).slice(0, 6), [enriched]);
@@ -118,8 +99,6 @@ export default function StorefrontHome() {
     );
   }
 
-  const sl = heroSlides[hs] || null;
-
   return (
     <div>
       {/* ── Ticker ── */}
@@ -130,6 +109,9 @@ export default function StorefrontHome() {
           ))}
         </div>
       </div>
+
+      {/* ── Hero Banner ── */}
+      <HeroSection />
 
       <div className="bb-page">
         {/* ── Category quick icons ── */}
@@ -162,77 +144,6 @@ export default function StorefrontHome() {
             <span className="category-label">Under ₹50</span>
           </div>
         </div>
-
-        {/* ── Hero banner ── */}
-        {sl && (
-          <div className="hero-section" style={{ background: sl.bg }}>
-            <div className="hero-inner">
-              <div className="hero-text">
-                <span className="hero-badge" style={{ background: sl.accent }}>
-                  🔥 TRENDING NOW
-                </span>
-                <h2 className="hero-title bb-head">{sl.p.name}</h2>
-                <p className="hero-desc">
-                  {sl.p.description?.slice(0, 150)}{(sl.p.description?.length || 0) > 150 ? '…' : ''}
-                </p>
-                <div className="hero-price-row">
-                  <span className="hero-price bb-head" style={{ color: sl.accent }}>
-                    {formatPrice(sl.p.price)}
-                  </span>
-                  <span className="hero-mrp">{formatPrice(sl.p.mrp)}</span>
-                  <span className="hero-discount" style={{ background: 'var(--color-success)' }}>
-                    {discPct(sl.p.price, sl.p.mrp)}% OFF
-                  </span>
-                </div>
-                <div className="hero-actions">
-                  <button
-                    className="btn btn--primary btn--lg"
-                    style={{ background: sl.accent }}
-                    onClick={() => navigate(`/product/${sl.p._id}`)}
-                  >
-                    Buy now →
-                  </button>
-                  <button
-                    className="btn btn--outline btn--lg"
-                    style={{ color: sl.accent, borderColor: sl.accent }}
-                    onClick={async () => {
-                      try {
-                        await apiService.addToCart(sl.p._id, 1);
-                        const r = await apiService.getCartItems();
-                        if (r?.data) dispatch(setCartItems(r.data));
-                        dispatch(setRefreshCartItems());
-                        toast.success('Added!');
-                      } catch (e) { toast.error(e.message || 'Failed'); }
-                    }}
-                  >
-                    Add to bag
-                  </button>
-                </div>
-              </div>
-
-              <div
-                className="hero-product-image"
-                style={{ background: sl.p._ui?.grad || sl.bg, boxShadow: `0 16px 48px ${sl.accent}35` }}
-              >
-                {sl.p.images?.[0]
-                  ? <img src={sl.p.images[0]} alt="" style={{ width: '85%', height: '85%', objectFit: 'contain' }} />
-                  : <span>{sl.p._ui?.emoji || '🎁'}</span>}
-              </div>
-            </div>
-
-            <div className="hero-dots">
-              {heroSlides.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  aria-label={`slide ${i + 1}`}
-                  onClick={() => setHs(i)}
-                  className={`hero-dot${i === hs ? ' active' : ''}`}
-                />
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* ── Hot & new ── */}
         <div className="bb-section">
