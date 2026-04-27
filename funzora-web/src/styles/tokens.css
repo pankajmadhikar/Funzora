@@ -7,7 +7,8 @@
   --color-success: #2ECC71;
   --color-warning: #F59E0B;
 
-  --color-bg: #F7F8FA;
+  /* App canvas — white so storefront sections read clean on one surface */
+  --color-bg: #ffffff;
   --color-surface: #FFFFFF;
   --color-border: #EBEBEB;
   --color-border-strong: #D5D5D5;

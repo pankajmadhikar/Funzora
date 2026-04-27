@@ -4,36 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { apiService } from '../../services/apiService';
 import { enrichProducts } from '../../utils/enrichProduct';
-import { formatPrice } from '../../utils/formatPrice';
 import ToyProductCard from './ToyProductCard';
 import HeroSection from './HeroSection';
-
-const TRUST = [
-  { emoji: '🛡️', title: '100% safe materials', desc: 'Non-toxic, child-safe picks' },
-  { emoji: '🚚', title: 'Pan-India delivery', desc: 'Ship wherever your pincode allows' },
-  { emoji: '↩️', title: '7-day easy returns', desc: 'Hassle-free support' },
-  { emoji: '💳', title: 'Secure checkout', desc: 'Payment flow stays protected' },
-];
-
-const FAQS = [
-  { q: 'Are products safe for children?', a: 'We list age guidance from your catalog and highlight non-toxic picks. Always supervise young children during play.' },
-  { q: 'How does delivery work?', a: 'Orders are fulfilled per your store operations. Free shipping applies on cart subtotals of ₹199+.' },
-  { q: 'What if something is wrong with my order?', a: 'Reach out via your support channels. Return policies follow your business rules.' },
-  { q: 'What payment options are supported?', a: 'Checkout uses your existing backend flow. The payment step is for UX; gateway integration can be added later.' },
-];
-
-function FaqItem({ q, a }) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className={`faq-item${open ? ' open' : ''}`}>
-      <button className="faq-question" onClick={() => setOpen((o) => !o)}>
-        <span>{q}</span>
-        <span className="faq-icon">{open ? '−' : '+'}</span>
-      </button>
-      {open && <div className="faq-answer">{a}</div>}
-    </div>
-  );
-}
+import ReviewSection from './ReviewSection';
 
 export default function StorefrontHome() {
   const navigate = useNavigate();
@@ -123,27 +96,9 @@ export default function StorefrontHome() {
           </div>
         )}
 
-        {/* ── Trust ── */}
+        {/* ── Parent reviews + trust ribbon ── */}
         <div className="bb-section">
-          <div className="trust-grid">
-            {TRUST.map((b) => (
-              <div key={b.title} className="trust-card">
-                <span className="trust-icon">{b.emoji}</span>
-                <span className="trust-title">{b.title}</span>
-                <span className="trust-desc">{b.desc}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* ── FAQ ── */}
-        <div className="bb-section" style={{ maxWidth: 760, margin: '0 auto' }}>
-          <h2 className="section-title bb-head" style={{ textAlign: 'center', marginBottom: 'var(--space-xl)' }}>
-            Questions? <span style={{ color: 'var(--color-primary)' }}>We've got you</span>
-          </h2>
-          <div className="faq-list">
-            {FAQS.map((f) => <FaqItem key={f.q} q={f.q} a={f.a} />)}
-          </div>
+          <ReviewSection />
         </div>
       </div>
     </div>
