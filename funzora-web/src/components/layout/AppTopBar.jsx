@@ -6,7 +6,7 @@ import { apiService } from '../../services/apiService';
 import CartBagDrawer from '../storefront/CartBagDrawer';
 import './AppTopBar.css';
 
-export default function AppTopBar({ onMenuClick, showMenuButton = false, onAccountMenuOpen }) {
+export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -98,28 +98,20 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false, onAccou
             </div>
           )}
 
-          {/* Actions */}
-          <div className="fz-header-actions">
-            {userRole !== 'admin' && (
-              <button className="fz-header-action" onClick={() => navigate('/wishlist')}>
+          {/* Actions (Account lives in sidebar) */}
+          {userRole !== 'admin' && (
+            <div className="fz-header-actions">
+              <button type="button" className="fz-header-action" onClick={() => navigate('/wishlist')}>
                 <span className="fz-header-action-icon">🤍</span>
                 <span className="fz-header-action-label">Wishlist</span>
               </button>
-            )}
-
-            <button type="button" className="fz-header-action" onClick={(e) => onAccountMenuOpen?.(e)}>
-              <span className="fz-header-action-icon">👤</span>
-              <span className="fz-header-action-label">Account</span>
-            </button>
-
-            {userRole !== 'admin' && (
-              <button className="fz-header-action fz-header-cart" onClick={() => setCartOpen(true)}>
+              <button type="button" className="fz-header-action fz-header-cart" onClick={() => setCartOpen(true)}>
                 <span className="fz-header-action-icon">🛒</span>
                 <span className="fz-header-action-label">Cart</span>
                 {cartCount > 0 && <span className="fz-header-cart-badge">{cartCount}</span>}
               </button>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
       </header>

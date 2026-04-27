@@ -86,7 +86,6 @@ function AppShell() {
           <AppTopBar
             onMenuClick={() => setSideOpen(true)}
             showMenuButton={!isDesktop}
-            onAccountMenuOpen={(e) => setAccountMenu({ anchorEl: e.currentTarget, source: 'header' })}
           />
         )}
 
