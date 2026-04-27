@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { Provider } from 'react-redux';
 import { store } from './store/store';
@@ -38,20 +38,17 @@ function AppShell() {
   const [sidebarExpanded, setSidebarExpanded] = useState(() => {
     try {
       const raw = localStorage.getItem(SIDEBAR_LS_KEY);
-      if (raw === null) return false;
-      return raw === 'true';
-    } catch {
-      return false;
-    }
+      return raw === null ? true : raw === 'true';
+    } catch { return true; }
   });
 
-  useEffect(() => {
-    try {
-      localStorage.setItem(SIDEBAR_LS_KEY, String(sidebarExpanded));
-    } catch {
-      /* ignore */
-    }
-  }, [sidebarExpanded]);
+  const toggleSidebar = () => {
+    setSidebarExpanded((prev) => {
+      const next = !prev;
+      try { localStorage.setItem(SIDEBAR_LS_KEY, String(next)); } catch {}
+      return next;
+    });
+  };
 
   const { user, isAuthenticated } = useSelector((s) => s.auth);
   const isValidUser = user && typeof user === 'object';
@@ -68,7 +65,7 @@ function AppShell() {
           onClose={() => setSideOpen(false)}
           role={userRole}
           expanded={sidebarExpanded}
-          onToggleExpanded={() => setSidebarExpanded((e) => !e)}
+          onToggleExpanded={toggleSidebar}
         />
       )}
 

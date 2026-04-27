@@ -13,16 +13,6 @@ import { formatPrice } from '../../utils/formatPrice';
 import ToyProductCard from './ToyProductCard';
 import HeroSection from './HeroSection';
 
-const TICKER_ITEMS = [
-  '🎁 All toys under ₹100',
-  '🚚 Free shipping above ₹199',
-  '⭐ 4.8 rated by families',
-  '🔄 7-day easy returns',
-  '🇮🇳 Pan India delivery',
-  '🛡️ Safe & non-toxic',
-  '🏷️ Up to 60% off MRP',
-];
-
 const TRUST = [
   { emoji: '🛡️', title: '100% safe materials', desc: 'Non-toxic, child-safe picks' },
   { emoji: '🚚', title: 'Pan-India delivery', desc: 'Ship wherever your pincode allows' },
@@ -101,15 +91,6 @@ export default function StorefrontHome() {
 
   return (
     <div>
-      {/* ── Ticker ── */}
-      <div className="ticker-bar">
-        <div className="ticker-track">
-          {[...TICKER_ITEMS, ...TICKER_ITEMS].map((item, i) => (
-            <span key={i} className="ticker-item">{item}</span>
-          ))}
-        </div>
-      </div>
-
       {/* ── Hero Banner ── */}
       <HeroSection />
 

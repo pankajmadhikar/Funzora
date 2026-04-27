@@ -1,0 +1,296 @@
+/* ═══════════════════════════════════════════
+   FUNZORA HEADER — Toy store design
+   ═══════════════════════════════════════════ */
+
+.fz-header {
+  background: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid #f0ece8;
+}
+
+.fz-header-inner {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 28px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Mobile menu button */
+.fz-header-menu-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 40px;
+  height: 40px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.fz-header-menu-btn span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #666;
+  border-radius: 2px;
+}
+
+.fz-header-menu-btn:hover span {
+  background: #f17a7e;
+}
+
+/* Logo */
+.fz-header-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.fz-header-logo-icon {
+  width: 42px;
+  height: 42px;
+  background: linear-gradient(135deg, #fde8d0, #fcd5ba);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.fz-header-logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.fz-header-logo-name {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.fz-logo-fun {
+  color: #c35a5e;
+}
+
+.fz-logo-zora {
+  color: #79a36e;
+}
+
+.fz-header-logo-tagline {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  color: #79a36e;
+  letter-spacing: 0.8px;
+  margin-top: 1px;
+}
+
+/* Search */
+.fz-header-search {
+  flex: 1;
+  max-width: 500px;
+  display: flex;
+  align-items: center;
+  background: #f5f5f5;
+  border-radius: 999px;
+  padding: 4px 4px 4px 16px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.fz-header-search-icon {
+  font-size: 16px;
+  margin-right: 8px;
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+.fz-header-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: #333;
+  min-width: 0;
+}
+
+.fz-header-search-input::placeholder {
+  color: #aaa;
+}
+
+.fz-header-search-btn {
+  background: #f17a7e;
+  color: #fff;
+  border: none;
+  padding: 10px 24px;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.fz-header-search-btn:hover {
+  background: #e06a6e;
+}
+
+/* Actions */
+.fz-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-shrink: 0;
+}
+
+.fz-header-action {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  padding: 4px;
+}
+
+.fz-header-action-icon {
+  font-size: 22px;
+  line-height: 1;
+  transition: transform 0.15s;
+}
+
+.fz-header-action:hover .fz-header-action-icon {
+  transform: scale(1.1);
+}
+
+.fz-header-action-label {
+  font-family: var(--font-body);
+  font-size: 10px;
+  font-weight: 700;
+  color: #777;
+}
+
+/* Cart badge */
+.fz-header-cart {
+  position: relative;
+}
+
+.fz-header-cart-badge {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  min-width: 17px;
+  height: 17px;
+  background: #f17a7e;
+  color: #fff;
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: 9px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 4px;
+  border: 2px solid #fff;
+}
+
+/* ═══════════════════════════════════════════
+   ANNOUNCEMENT BAR
+   ═══════════════════════════════════════════ */
+
+.fz-announcement-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #faf6f3;
+  padding: 10px 20px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.fz-announcement-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 600;
+  color: #555;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: 4px 12px;
+  background: #fff;
+  border-radius: 999px;
+  border: 1px solid #efe9e3;
+}
+
+/* ═══════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .fz-header-inner {
+    gap: 12px;
+    padding: 10px 16px;
+  }
+
+  .fz-header-search {
+    max-width: 360px;
+  }
+}
+
+@media (max-width: 767px) {
+  .fz-header-inner {
+    gap: 8px;
+    padding: 8px 12px;
+    flex-wrap: wrap;
+  }
+
+  .fz-header-logo-text {
+    display: none;
+  }
+
+  .fz-header-search {
+    order: 10;
+    max-width: none;
+    flex-basis: 100%;
+    margin: 0;
+  }
+
+  .fz-header-actions {
+    gap: 12px;
+  }
+
+  .fz-header-action-label {
+    display: none;
+  }
+
+  .fz-announcement-bar {
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 8px 12px;
+  }
+
+  .fz-announcement-item {
+    font-size: 11px;
+    padding: 3px 10px;
+  }
+}

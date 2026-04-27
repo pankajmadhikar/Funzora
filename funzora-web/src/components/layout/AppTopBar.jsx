@@ -1,14 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, Typography, IconButton, InputBase, Menu, MenuItem, Divider, Badge } from '@mui/material';
-import {
-  MenuRounded,
-  PersonRounded,
-  LogoutRounded,
-  ShoppingBagRounded,
-  ListAltRounded,
-  SearchRounded,
-  CloseRounded,
-} from '@mui/icons-material';
+import { Menu, MenuItem, Divider, Badge } from '@mui/material';
+import { PersonRounded, LogoutRounded, ListAltRounded } from '@mui/icons-material';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../redux/slices/authSlice';
@@ -16,6 +8,16 @@ import { setCartItems } from '../../store/slices/cartSlice';
 import { apiService } from '../../services/apiService';
 import { toast } from 'react-hot-toast';
 import CartBagDrawer from '../storefront/CartBagDrawer';
+import './AppTopBar.css';
+
+const ANNOUNCEMENTS = [
+  { icon: '🏷️', text: 'Up to 60% off MRP' },
+  { icon: '🎁', text: 'All toys under ₹100' },
+  { icon: '🚚', text: 'Free shipping above ₹199' },
+  { icon: '⭐', text: '4.8 rated by families' },
+  { icon: '🔄', text: '7-day easy returns' },
+  { icon: '🇮🇳', text: 'Pan India delivery' },
+];
 
 export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
   const dispatch = useDispatch();
@@ -68,182 +70,93 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
     navigate(q ? `/shop?${q}` : '/shop');
   };
 
+  const onSearchSubmit = (e) => {
+    e?.preventDefault();
+    const v = search.trim();
+    if (v) goShop({ q: v }); else goShop();
+  };
+
   const onSearchKey = (e) => {
-    if (e.key === 'Enter') {
-      const v = search.trim();
-      if (v) goShop({ q: v });
-      else goShop();
-    }
+    if (e.key === 'Enter') onSearchSubmit();
   };
 
   if (!isAuthenticated || !isValidUser) return null;
 
   return (
     <>
-      <Box
-        component="header"
-        sx={{
-          bgcolor: '#fff',
-          borderBottom: '1px solid #E8EAED',
-          position: 'sticky',
-          top: 0,
-          zIndex: 100,
-        }}
-      >
-        <Box
-          sx={{
-            maxWidth: 'var(--bb-content-max, 1280px)',
-            mx: 'auto',
-            width: '100%',
-            minHeight: 56,
-            px: 'var(--bb-gutter, 16px)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: { xs: 1, sm: 1.5 },
-            py: 1,
-          }}
-        >
+      <header className="fz-header">
+        <div className="fz-header-inner">
+          {/* Mobile menu button */}
           {showMenuButton && (
-            <IconButton onClick={onMenuClick} edge="start" sx={{ color: '#6B7280', mr: 0.25 }} aria-label="Open menu">
-              <MenuRounded />
-            </IconButton>
+            <button className="fz-header-menu-btn" onClick={onMenuClick} aria-label="Open menu">
+              <span /><span /><span />
+            </button>
           )}
 
-          <Box
-            component={Link}
-            to={userRole === 'admin' ? '/admin' : '/'}
-            onClick={() => setSearch('')}
-            sx={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}
-          >
-            <Box
-              sx={{
-                background: 'linear-gradient(135deg,#FF6B35,#FFD23F)',
-                borderRadius: '12px',
-                width: 36,
-                height: 36,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: 18,
-              }}
-            >
-              🎁
-            </Box>
-            <Box sx={{ display: { xs: 'none', sm: 'block' } }}>
-              <Typography className="bb-head" sx={{ fontSize: 17, color: '#1A1A2E', lineHeight: 1.1 }}>
-                <Box component="span" sx={{ color: '#FF6B35' }}>Funzo</Box>
-                {userRole === 'admin' ? 'Admin' : 'Toys'}
-              </Typography>
-            </Box>
-          </Box>
+          {/* Logo */}
+          <Link to={userRole === 'admin' ? '/admin' : '/'} className="fz-header-logo" onClick={() => setSearch('')}>
+            <div className="fz-header-logo-icon">🧸</div>
+            <div className="fz-header-logo-text">
+              <span className="fz-header-logo-name">
+                <span className="fz-logo-fun">Fun</span><span className="fz-logo-zora">Zora</span>
+              </span>
+              <span className="fz-header-logo-tagline">Play. Smile. Grow.</span>
+            </div>
+          </Link>
 
+          {/* Search */}
           {userRole !== 'admin' && (
-            <Box
-              sx={{
-                flex: 1,
-                minWidth: 0,
-                maxWidth: { xs: 'none', md: 480 },
-                mx: { xs: 0, md: 'auto' },
-              }}
-            >
-              <Box sx={{ position: 'relative' }}>
-                <SearchRounded
-                  sx={{
-                    position: 'absolute',
-                    left: 16,
-                    top: '50%',
-                    transform: 'translateY(-50%)',
-                    fontSize: 20,
-                    color: '#9CA3AF',
-                    pointerEvents: 'none',
-                  }}
-                />
-                <InputBase
-                  placeholder="Search toys, games, puzzles…"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onKeyDown={onSearchKey}
-                  onFocus={() => {
-                    if (location.pathname !== '/shop') goShop();
-                  }}
-                  sx={{
-                    width: '100%',
-                    pl: 5.75,
-                    pr: search ? 4.5 : 2.5,
-                    py: 1.125,
-                    border: '1px solid #E5E7EB',
-                    borderRadius: '999px',
-                    bgcolor: '#F9FAFB',
-                    fontSize: 14,
-                    color: '#1A1A2E',
-                    fontWeight: 600,
-                    transition: 'border-color 0.2s, background-color 0.2s',
-                    '&.Mui-focused': { borderColor: '#FF6B35', bgcolor: '#fff', boxShadow: '0 0 0 3px rgba(255,107,53,0.12)' },
-                  }}
-                />
-                {search && (
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      setSearch('');
-                      goShop();
-                    }}
-                    sx={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)' }}
-                    aria-label="Clear search"
-                  >
-                    <CloseRounded sx={{ fontSize: 18 }} />
-                  </IconButton>
-                )}
-              </Box>
-            </Box>
+            <div className="fz-header-search">
+              <span className="fz-header-search-icon">🔍</span>
+              <input
+                type="text"
+                placeholder="Search for toys, games, puzzles..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                onKeyDown={onSearchKey}
+                onFocus={() => { if (location.pathname !== '/shop') goShop(); }}
+                className="fz-header-search-input"
+              />
+              <button className="fz-header-search-btn" onClick={onSearchSubmit}>Search</button>
+            </div>
           )}
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, ml: 'auto', flexShrink: 0 }}>
-          {userRole !== 'admin' && (
-            <IconButton
-              onClick={() => setCartOpen(true)}
-              sx={{
-                bgcolor: '#FFF0EB',
-                borderRadius: '12px',
-                width: 40,
-                height: 40,
-                '&:hover': { bgcolor: '#FFE0D3' },
-              }}
-            >
-              <Badge
-                badgeContent={cartCount}
-                sx={{
-                  '& .MuiBadge-badge': {
-                    bgcolor: '#FF6B35',
-                    color: '#fff',
-                    fontWeight: 800,
-                    fontSize: 10,
-                    minWidth: 18,
-                    height: 18,
-                  },
-                }}
-              >
-                <ShoppingBagRounded sx={{ fontSize: 20, color: '#FF6B35' }} />
-              </Badge>
-            </IconButton>
-          )}
+          {/* Actions */}
+          <div className="fz-header-actions">
+            {userRole !== 'admin' && (
+              <button className="fz-header-action" onClick={() => navigate('/wishlist')}>
+                <span className="fz-header-action-icon">🤍</span>
+                <span className="fz-header-action-label">Wishlist</span>
+              </button>
+            )}
 
-          <IconButton
-            onClick={(e) => setAnchorEl(e.currentTarget)}
-            sx={{
-              border: '1.5px solid #E5E7EB',
-              borderRadius: '12px',
-              width: 40,
-              height: 40,
-              '&:hover': { bgcolor: '#F3F4F6' },
-            }}
-            aria-label="Account menu"
-          >
-            <PersonRounded sx={{ fontSize: 20, color: '#6B7280' }} />
-          </IconButton>
-        </Box>
-        </Box>
-      </Box>
+            <button className="fz-header-action" onClick={(e) => setAnchorEl(e.currentTarget)}>
+              <span className="fz-header-action-icon">👤</span>
+              <span className="fz-header-action-label">Account</span>
+            </button>
+
+            {userRole !== 'admin' && (
+              <button className="fz-header-action fz-header-cart" onClick={() => setCartOpen(true)}>
+                <span className="fz-header-action-icon">🛒</span>
+                <span className="fz-header-action-label">Cart</span>
+                {cartCount > 0 && <span className="fz-header-cart-badge">{cartCount}</span>}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Announcement bar */}
+        {userRole !== 'admin' && (
+          <div className="fz-announcement-bar">
+            {ANNOUNCEMENTS.map((a, i) => (
+              <div key={i} className="fz-announcement-item">
+                <span>{a.icon}</span>
+                <span>{a.text}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </header>
 
       <CartBagDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
 
@@ -253,38 +166,25 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
         onClose={() => setAnchorEl(null)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        PaperProps={{
-          sx: { borderRadius: '12px', boxShadow: '0 8px 32px rgba(0,0,0,0.1)', mt: 1, minWidth: 180 },
-        }}
+        PaperProps={{ sx: { borderRadius: '14px', boxShadow: '0 8px 32px rgba(0,0,0,0.1)', mt: 1, minWidth: 180 } }}
       >
         {isValidUser && (
-          <Box sx={{ px: 2, py: 1.5, borderBottom: '1px solid #F0F0F0' }}>
-            <Typography sx={{ fontWeight: 800, fontSize: 14, color: '#1A1A2E' }}>
-              {user.name || 'User'}
-            </Typography>
-            <Typography sx={{ fontSize: 12, color: '#9CA3AF' }}>{user.email || ''}</Typography>
-          </Box>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
+            <div style={{ fontWeight: 800, fontSize: 14, color: '#333' }}>{user.firstname || user.name || 'User'}</div>
+            <div style={{ fontSize: 12, color: '#999' }}>{user.email || ''}</div>
+          </div>
         )}
-        <MenuItem
-          onClick={() => { setAnchorEl(null); navigate('/profile'); }}
-          sx={{ fontSize: 14, fontWeight: 600, py: 1.25 }}
-        >
-          <PersonRounded sx={{ mr: 1.25, fontSize: 18, color: '#6B7280' }} />
-          Profile
+        <MenuItem onClick={() => { setAnchorEl(null); navigate('/profile'); }} sx={{ fontSize: 14, fontWeight: 600, py: 1.25 }}>
+          <PersonRounded sx={{ mr: 1.25, fontSize: 18, color: '#888' }} /> Profile
         </MenuItem>
         {userRole !== 'admin' && (
-          <MenuItem
-            onClick={() => { setAnchorEl(null); navigate('/profile'); }}
-            sx={{ fontSize: 14, fontWeight: 600, py: 1.25 }}
-          >
-            <ListAltRounded sx={{ mr: 1.25, fontSize: 18, color: '#6B7280' }} />
-            My orders
+          <MenuItem onClick={() => { setAnchorEl(null); navigate('/profile'); }} sx={{ fontSize: 14, fontWeight: 600, py: 1.25 }}>
+            <ListAltRounded sx={{ mr: 1.25, fontSize: 18, color: '#888' }} /> My orders
           </MenuItem>
         )}
         <Divider sx={{ my: 0.5 }} />
         <MenuItem onClick={handleLogout} sx={{ fontSize: 14, fontWeight: 600, py: 1.25, color: '#EF4444' }}>
-          <LogoutRounded sx={{ mr: 1.25, fontSize: 18 }} />
-          Logout
+          <LogoutRounded sx={{ mr: 1.25, fontSize: 18 }} /> Logout
         </MenuItem>
       </Menu>
     </>
