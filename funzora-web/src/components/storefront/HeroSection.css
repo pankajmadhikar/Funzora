@@ -29,7 +29,7 @@
 .hero-banner-tagline {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 800;
@@ -38,9 +38,9 @@
   margin-bottom: 16px;
 }
 
-.hero-banner-heart {
+.hero-banner-tagline-heart {
+  flex-shrink: 0;
   color: #ef8d9c;
-  font-size: 14px;
 }
 
 .hero-banner-title {
@@ -131,8 +131,7 @@
 
 .hero-banner-badge-heart {
   color: #ef8d9c;
-  font-size: 16px;
-  line-height: 1;
+  line-height: 0;
 }
 
 /* ── Wave footer strip ── */
@@ -165,16 +164,11 @@
 }
 
 .hero-banner-wave-icon {
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  border-radius: 50%;
-  border: 1.5px solid #e8e0d8;
-  background: #fff;
+  flex-shrink: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
+  color: #9ca3af;
 }
 
 .hero-banner-wave-title {
@@ -218,10 +212,6 @@
 
   .hero-banner-badge-inner {
     font-size: 8px;
-  }
-
-  .hero-banner-badge-heart {
-    font-size: 14px;
   }
 
   .hero-banner-wave-content {

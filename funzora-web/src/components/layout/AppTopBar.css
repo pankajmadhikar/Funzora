@@ -22,10 +22,8 @@
 /* Mobile menu button */
 .fz-header-menu-btn {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 4px;
   width: 40px;
   height: 40px;
   background: none;
@@ -34,18 +32,6 @@
   padding: 8px;
   border-radius: 8px;
   flex-shrink: 0;
-}
-
-.fz-header-menu-btn span {
-  display: block;
-  width: 20px;
-  height: 2px;
-  background: #666;
-  border-radius: 2px;
-}
-
-.fz-header-menu-btn:hover span {
-  background: #f17a7e;
 }
 
 /* Logo */
@@ -65,7 +51,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 22px;
 }
 
 .fz-header-logo-text {
@@ -111,10 +96,11 @@
 }
 
 .fz-header-search-icon {
-  font-size: 16px;
   margin-right: 8px;
   flex-shrink: 0;
-  opacity: 0.5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .fz-header-search-input {
@@ -171,13 +157,15 @@
 }
 
 .fz-header-action-icon {
-  font-size: 22px;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
   transition: transform 0.15s;
 }
 
 .fz-header-action:hover .fz-header-action-icon {
-  transform: scale(1.1);
+  transform: scale(1.06);
 }
 
 .fz-header-action-label {

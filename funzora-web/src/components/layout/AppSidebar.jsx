@@ -1,6 +1,7 @@
 import React from 'react';
 import { Drawer, useMediaQuery, useTheme } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { ICON_STROKE, ICON_SIZES } from '../../constants/appIconTokens';
 import {
   Home,
   LayoutGrid,
@@ -86,11 +87,11 @@ function NavItem({ item, active, expanded, onNavigate }) {
       ].join(' ')}
     >
       <Icon
-        size={18}
-        strokeWidth={active ? 2.25 : 2}
+        size={ICON_SIZES.md}
+        strokeWidth={active ? 2.25 : ICON_STROKE}
         className={[
           'shrink-0 transition-colors',
-          active ? 'text-orange-500' : 'text-neutral-400 group-hover:text-neutral-500',
+          active ? 'text-orange-500' : 'text-neutral-400 group-hover:text-neutral-600',
         ].join(' ')}
         aria-hidden
       />
@@ -178,7 +179,7 @@ function SidebarContent({ role, onNav, pathname, search, expanded, onToggle, onA
           aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
           className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ff8a6a] to-[#f06292] text-white shadow-[0_2px_10px_rgba(240,98,146,0.32)] transition hover:brightness-[1.03] active:scale-[0.98]"
         >
-          <Menu size={20} strokeWidth={2.25} aria-hidden />
+          <Menu size={ICON_SIZES.lg} strokeWidth={ICON_STROKE} aria-hidden />
         </button>
       </div>
 
@@ -197,11 +198,11 @@ function SidebarContent({ role, onNav, pathname, search, expanded, onToggle, onA
           aria-haspopup="menu"
           title={expanded ? undefined : 'Account'}
           className={[
-            'flex w-full items-center rounded-xl border border-neutral-200/70 bg-white text-left text-[13px] font-bold text-neutral-700 transition hover:border-orange-200/80 hover:bg-white hover:text-orange-700',
+            'group flex w-full items-center rounded-xl border border-neutral-200/70 bg-white text-left text-[13px] font-bold text-neutral-700 transition hover:border-orange-200/80 hover:bg-white hover:text-orange-700',
             expanded ? 'gap-3 px-3 py-2.5' : 'justify-center px-2 py-2.5',
           ].join(' ')}
         >
-          <User size={18} strokeWidth={2} className="shrink-0 text-neutral-400" aria-hidden />
+          <User size={ICON_SIZES.md} strokeWidth={ICON_STROKE} className="shrink-0 text-neutral-400 transition-colors group-hover:text-neutral-600" aria-hidden />
           {expanded && <span>Account</span>}
         </button>
       </div>

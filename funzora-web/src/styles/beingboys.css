@@ -224,6 +224,17 @@
   transform: translate(-50%, -50%);
 }
 
+.pc2-emoji-fallback {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
 /* Badges + heart — absolute inside image */
 .pc2-overlay-top {
   position: absolute;
@@ -265,6 +276,27 @@
   color: #365314;
 }
 
+.pc2-tag-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pc2-tag-with-icon .pc2-tag-icon {
+  flex-shrink: 0;
+  color: inherit;
+}
+
+.pc2-stars--with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.pc2-star-icon {
+  flex-shrink: 0;
+}
+
 .pc2-heart {
   margin-left: auto;
   width: 32px;
@@ -282,20 +314,23 @@
     background 0.15s,
     border-color 0.15s;
   flex-shrink: 0;
-  color: #ccc;
+  color: #a3a3a3;
   backdrop-filter: blur(4px);
 }
 
 .pc2-heart:hover {
-  transform: scale(1.12);
-  border-color: #f9a8d4;
-  color: #f472b6;
+  transform: scale(1.06);
+  border-color: #e5e5e5;
 }
 
 .pc2-heart.on {
-  background: #fde8f4;
-  border-color: #f472b6;
-  color: #ec4899;
+  background: rgba(255, 247, 237, 0.95);
+  border-color: #fed7aa;
+  color: #f97316;
+}
+
+.pc2-heart svg {
+  display: block;
 }
 
 /* ── Card body ── */
@@ -399,7 +434,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  line-height: 0;
   cursor: pointer;
   transition:
     background 0.12s,

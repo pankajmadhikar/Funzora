@@ -1,13 +1,14 @@
 import React from 'react';
 import { Menu, MenuItem, Divider } from '@mui/material';
-import { PersonRounded, LogoutRounded, ListAltRounded } from '@mui/icons-material';
+import { ClipboardList, LogOut, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../../redux/slices/authSlice';
 import { toast } from 'react-hot-toast';
+import { ICON_STROKE, ICON_SIZES } from '../../constants/appIconTokens';
 
 /**
- * Shared account dropdown — anchored from header Account or sidebar Account.
+ * Shared account dropdown — anchored from sidebar Account.
  * @param {{ anchorEl: HTMLElement, source: 'header' | 'sidebar' } | null} anchorState
  */
 export default function AccountUserMenu({ anchorState, onClose, afterNavigate }) {
@@ -36,6 +37,10 @@ export default function AccountUserMenu({ anchorState, onClose, afterNavigate })
   };
 
   if (!isValidUser) return null;
+
+  const itemIcon = (Icon) => (
+    <Icon size={ICON_SIZES.md} strokeWidth={ICON_STROKE} className="text-neutral-400 shrink-0" aria-hidden />
+  );
 
   return (
     <Menu
@@ -71,17 +76,20 @@ export default function AccountUserMenu({ anchorState, onClose, afterNavigate })
         </div>
         <div style={{ fontSize: 12, color: '#999' }}>{user.email || ''}</div>
       </div>
-      <MenuItem onClick={goProfile} sx={{ fontSize: 14, fontWeight: 600, py: 1.25 }}>
-        <PersonRounded sx={{ mr: 1.25, fontSize: 18, color: '#888' }} /> Profile
+      <MenuItem onClick={goProfile} sx={{ fontSize: 14, fontWeight: 600, py: 1.25, gap: 1.25, display: 'flex', alignItems: 'center' }}>
+        {itemIcon(User)}
+        Profile
       </MenuItem>
       {userRole !== 'admin' && (
-        <MenuItem onClick={goProfile} sx={{ fontSize: 14, fontWeight: 600, py: 1.25 }}>
-          <ListAltRounded sx={{ mr: 1.25, fontSize: 18, color: '#888' }} /> My orders
+        <MenuItem onClick={goProfile} sx={{ fontSize: 14, fontWeight: 600, py: 1.25, gap: 1.25, display: 'flex', alignItems: 'center' }}>
+          {itemIcon(ClipboardList)}
+          My orders
         </MenuItem>
       )}
       <Divider sx={{ my: 0.5 }} />
-      <MenuItem onClick={handleLogout} sx={{ fontSize: 14, fontWeight: 600, py: 1.25, color: '#EF4444' }}>
-        <LogoutRounded sx={{ mr: 1.25, fontSize: 18 }} /> Logout
+      <MenuItem onClick={handleLogout} sx={{ fontSize: 14, fontWeight: 600, py: 1.25, gap: 1.25, display: 'flex', alignItems: 'center', color: '#EF4444' }}>
+        <LogOut size={ICON_SIZES.md} strokeWidth={ICON_STROKE} className="shrink-0 text-red-500" aria-hidden />
+        Logout
       </MenuItem>
     </Menu>
   );

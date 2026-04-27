@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
+import { Heart, Menu, Search, ShoppingCart, Sparkles } from 'lucide-react';
 import { setCartItems } from '../../store/slices/cartSlice';
 import { apiService } from '../../services/apiService';
 import CartBagDrawer from '../storefront/CartBagDrawer';
+import { ICON_STROKE, ICON_SIZES } from '../../constants/appIconTokens';
 import './AppTopBar.css';
 
 export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
@@ -63,16 +65,21 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
     <>
       <header className="fz-header">
         <div className="fz-header-inner">
-          {/* Mobile menu button */}
           {showMenuButton && (
-            <button className="fz-header-menu-btn" onClick={onMenuClick} aria-label="Open menu">
-              <span /><span /><span />
+            <button
+              type="button"
+              className="group fz-header-menu-btn"
+              onClick={onMenuClick}
+              aria-label="Open menu"
+            >
+              <Menu size={ICON_SIZES.lg} strokeWidth={ICON_STROKE} className="text-neutral-400 transition-colors group-hover:text-neutral-600" aria-hidden />
             </button>
           )}
 
-          {/* Logo */}
-          <Link to={userRole === 'admin' ? '/admin' : '/'} className="fz-header-logo" onClick={() => setSearch('')}>
-            <div className="fz-header-logo-icon">🧸</div>
+          <Link to={userRole === 'admin' ? '/admin' : '/'} className="fz-header-logo group" onClick={() => setSearch('')}>
+            <div className="fz-header-logo-icon">
+              <Sparkles size={ICON_SIZES.lg} strokeWidth={ICON_STROKE} className="text-neutral-400 transition-colors group-hover:text-orange-500" aria-hidden />
+            </div>
             <div className="fz-header-logo-text">
               <span className="fz-header-logo-name">
                 <span className="fz-logo-fun">Fun</span><span className="fz-logo-zora">Zora</span>
@@ -81,10 +88,11 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
             </div>
           </Link>
 
-          {/* Search */}
           {userRole !== 'admin' && (
             <div className="fz-header-search">
-              <span className="fz-header-search-icon">🔍</span>
+              <span className="fz-header-search-icon" aria-hidden>
+                <Search size={ICON_SIZES.md} strokeWidth={ICON_STROKE} className="text-neutral-400" />
+              </span>
               <input
                 type="text"
                 placeholder="Search for toys, games, puzzles..."
@@ -94,26 +102,28 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
                 onFocus={() => { if (location.pathname !== '/shop') goShop(); }}
                 className="fz-header-search-input"
               />
-              <button className="fz-header-search-btn" onClick={onSearchSubmit}>Search</button>
+              <button type="button" className="fz-header-search-btn" onClick={onSearchSubmit}>Search</button>
             </div>
           )}
 
-          {/* Actions (Account lives in sidebar) */}
           {userRole !== 'admin' && (
             <div className="fz-header-actions">
-              <button type="button" className="fz-header-action" onClick={() => navigate('/wishlist')}>
-                <span className="fz-header-action-icon">🤍</span>
+              <button type="button" className="group fz-header-action" onClick={() => navigate('/wishlist')}>
+                <span className="fz-header-action-icon" aria-hidden>
+                  <Heart size={ICON_SIZES.md} strokeWidth={ICON_STROKE} className="text-neutral-400 transition-colors group-hover:text-neutral-600" />
+                </span>
                 <span className="fz-header-action-label">Wishlist</span>
               </button>
-              <button type="button" className="fz-header-action fz-header-cart" onClick={() => setCartOpen(true)}>
-                <span className="fz-header-action-icon">🛒</span>
+              <button type="button" className="group fz-header-action fz-header-cart" onClick={() => setCartOpen(true)}>
+                <span className="fz-header-action-icon" aria-hidden>
+                  <ShoppingCart size={ICON_SIZES.md} strokeWidth={ICON_STROKE} className="text-neutral-400 transition-colors group-hover:text-neutral-600" />
+                </span>
                 <span className="fz-header-action-label">Cart</span>
                 {cartCount > 0 && <span className="fz-header-cart-badge">{cartCount}</span>}
               </button>
             </div>
           )}
         </div>
-
       </header>
 
       <CartBagDrawer open={cartOpen} onClose={() => setCartOpen(false)} />

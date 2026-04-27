@@ -1,36 +1,34 @@
 import React, { useState } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
+import { Lock, Package, RotateCcw, Shield, Sparkles, Star, Truck } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { ICON_STROKE, ICON_SIZES } from '../constants/appIconTokens';
 import './Footer.css';
 
 const TRUST_RIBBON = [
   {
     key: 'safe',
-    icon: '🛡️',
+    Icon: Shield,
     title: '100% Safe Materials',
     desc: 'Non-toxic, child-safe & BIS certified toys',
-    circle: 'funzora-icon-circle--red',
   },
   {
     key: 'delivery',
-    icon: '🚚',
+    Icon: Truck,
     title: 'Pan India Delivery',
     desc: 'Fast & reliable delivery across India',
-    circle: 'funzora-icon-circle--green',
   },
   {
     key: 'returns',
-    icon: '🔄',
+    Icon: RotateCcw,
     title: '7-Day Easy Returns',
     desc: 'Hassle-free returns within 7 days',
-    circle: 'funzora-icon-circle--purple',
   },
   {
     key: 'pay',
-    icon: '🔒',
+    Icon: Lock,
     title: 'Secure Payments',
     desc: 'Your payments are safe and protected',
-    circle: 'funzora-icon-circle--gold',
   },
 ];
 
@@ -83,7 +81,7 @@ function Footer() {
   const onWhatsappClick = (e) => {
     if (!whatsappHref) {
       e.preventDefault();
-      toast('Add VITE_WHATSAPP_NUMBER in .env to enable WhatsApp (e.g. 919876543210).', { icon: '💬' });
+      toast('Add VITE_WHATSAPP_NUMBER in .env to enable WhatsApp (e.g. 919876543210).');
     }
   };
 
@@ -93,12 +91,14 @@ function Footer() {
     <footer className="funzora-footer">
       <div className="funzora-footer-inner">
         <div className="funzora-trust-ribbon" aria-label="Store promises">
-          {TRUST_RIBBON.map((t) => (
-            <div className="funzora-trust-item" key={t.key}>
-              <div className={`funzora-icon-circle ${t.circle}`}>{t.icon}</div>
+          {TRUST_RIBBON.map(({ key, Icon, title, desc }) => (
+            <div className="funzora-trust-item" key={key}>
+              <div className="funzora-trust-icon-wrap" aria-hidden>
+                <Icon size={ICON_SIZES.md} strokeWidth={ICON_STROKE} />
+              </div>
               <div className="funzora-trust-text">
-                <strong>{t.title}</strong>
-                <p>{t.desc}</p>
+                <strong>{title}</strong>
+                <p>{desc}</p>
               </div>
             </div>
           ))}
@@ -108,7 +108,9 @@ function Footer() {
           <div className="funzora-brand-story">
             <div className="funzora-footer-logo">
               <RouterLink to="/" className="funzora-footer-logo-link">
-                <span className="funzora-footer-logo-icon" aria-hidden="true">🧸</span>
+                <span className="funzora-footer-logo-icon" aria-hidden="true">
+                  <Sparkles size={22} strokeWidth={ICON_STROKE} />
+                </span>
                 <div className="funzora-footer-logo-text">
                   <span className="funzora-footer-logo-name">
                     <span className="fun">Fun</span>
@@ -127,14 +129,14 @@ function Footer() {
               <li>Premium Quality</li>
             </ul>
             <div className="funzora-footer-illus" aria-hidden="true">
-              <span className="funzora-footer-illus-emoji">🐰</span>
+              <Package size={36} strokeWidth={ICON_STROKE} className="funzora-footer-illus-pack" />
               <div className="funzora-footer-illus-stack">
                 <span />
                 <span />
                 <span />
                 <span />
               </div>
-              <span className="funzora-footer-illus-star">⭐</span>
+              <Star size={28} strokeWidth={ICON_STROKE} className="funzora-footer-illus-star" />
             </div>
           </div>
 
