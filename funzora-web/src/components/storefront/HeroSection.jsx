@@ -3,13 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import heroBg from '../../assets/Banners/hero-bg-toys.png';
 import './HeroSection.css';
 
-const FEATURES = [
-  { icon: '🛡️', label: 'Premium\nQuality', bg: '#f19fa8' },
-  { icon: '🍃', label: 'Safe &\nNon-Toxic', bg: '#94b9d0' },
-  { icon: '👶', label: 'For All\nAges', bg: '#8dbd8d' },
-  { icon: '🎁', label: 'Perfect For\nGifting', bg: '#eec170' },
-];
-
 const FOOTER_ITEMS = [
   { icon: '🍃', title: 'Beautifully Crafted', desc: 'Made with love and attention to detail.' },
   { icon: '🛡️', title: 'Safe for Your Little Ones', desc: 'High-quality, non-toxic materials you can trust.' },
@@ -37,17 +30,6 @@ export default function HeroSection() {
           Premium soft toys and engaging hard toys<br />
           for endless fun and imaginative play.
         </p>
-
-        <div className="hero-banner-features">
-          {FEATURES.map((f) => (
-            <div key={f.label} className="hero-banner-feature">
-              <div className="hero-banner-feature-icon" style={{ background: f.bg }}>
-                {f.icon}
-              </div>
-              <span className="hero-banner-feature-label">{f.label}</span>
-            </div>
-          ))}
-        </div>
 
         <button className="hero-banner-cta" onClick={() => navigate('/shop')}>
           SHOP NOW <span className="hero-banner-cta-arrow">›</span>

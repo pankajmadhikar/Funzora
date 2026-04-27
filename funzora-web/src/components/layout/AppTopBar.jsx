@@ -10,15 +10,6 @@ import { toast } from 'react-hot-toast';
 import CartBagDrawer from '../storefront/CartBagDrawer';
 import './AppTopBar.css';
 
-const ANNOUNCEMENTS = [
-  { icon: '🏷️', text: 'Up to 60% off MRP' },
-  { icon: '🎁', text: 'All toys under ₹100' },
-  { icon: '🚚', text: 'Free shipping above ₹199' },
-  { icon: '⭐', text: '4.8 rated by families' },
-  { icon: '🔄', text: '7-day easy returns' },
-  { icon: '🇮🇳', text: 'Pan India delivery' },
-];
-
 export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -145,17 +136,6 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
           </div>
         </div>
 
-        {/* Announcement bar */}
-        {userRole !== 'admin' && (
-          <div className="fz-announcement-bar">
-            {ANNOUNCEMENTS.map((a, i) => (
-              <div key={i} className="fz-announcement-item">
-                <span>{a.icon}</span>
-                <span>{a.text}</span>
-              </div>
-            ))}
-          </div>
-        )}
       </header>
 
       <CartBagDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
