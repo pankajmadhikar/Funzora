@@ -41,13 +41,14 @@ function isActive(item, pathname, search) {
   return pathname.startsWith(p) && p !== '/';
 }
 
-function SidebarContent({ role, onNav, pathname, search, expanded, onToggle }) {
+function SidebarContent({ role, onNav, pathname, search, expanded, onToggle, onAccountMenuOpen }) {
   const items = role === 'admin' ? ADMIN_NAV : USER_NAV;
 
   return (
     <div className={`fz-sidebar${expanded ? '' : ' collapsed'}`}>
       <div className="fz-sidebar-top">
         <button
+          type="button"
           className="fz-sidebar-hamburger"
           onClick={onToggle}
           aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
@@ -61,6 +62,7 @@ function SidebarContent({ role, onNav, pathname, search, expanded, onToggle }) {
           const active = isActive(item, pathname, search);
           return (
             <button
+              type="button"
               key={item.id}
               className={`fz-sidebar-item${active ? ' active' : ''}`}
               onClick={() => onNav(item.path)}
@@ -73,21 +75,23 @@ function SidebarContent({ role, onNav, pathname, search, expanded, onToggle }) {
         })}
       </nav>
 
-      {role !== 'admin' && expanded && (
-        <div className="fz-sidebar-promo">
-          <div className="fz-sidebar-promo-icon">🎁</div>
-          <h3 className="fz-sidebar-promo-title">Special Offers!</h3>
-          <p className="fz-sidebar-promo-desc">Grab exciting deals on your favorite toys</p>
-          <button className="fz-sidebar-promo-btn" onClick={() => onNav('/shop?sort=disc')}>
-            View Offers →
-          </button>
-        </div>
-      )}
+      <div className="fz-sidebar-bottom">
+        <button
+          type="button"
+          className="fz-sidebar-account"
+          onClick={(e) => onAccountMenuOpen?.(e)}
+          aria-haspopup="menu"
+          title={expanded ? undefined : 'Account'}
+        >
+          <span className="fz-sidebar-icon" aria-hidden="true">👤</span>
+          {expanded && <span className="fz-sidebar-label">Account</span>}
+        </button>
+      </div>
     </div>
   );
 }
 
-export default function AppSidebar({ open, onClose, role = 'user', expanded = true, onToggleExpanded }) {
+export default function AppSidebar({ open, onClose, role = 'user', expanded = true, onToggleExpanded, onAccountMenuOpen }) {
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
@@ -111,6 +115,7 @@ export default function AppSidebar({ open, onClose, role = 'user', expanded = tr
           search={location.search}
           expanded={expanded}
           onToggle={onToggleExpanded}
+          onAccountMenuOpen={onAccountMenuOpen}
         />
       </aside>
     );
@@ -131,6 +136,7 @@ export default function AppSidebar({ open, onClose, role = 'user', expanded = tr
         search={location.search}
         expanded={true}
         onToggle={onClose}
+        onAccountMenuOpen={onAccountMenuOpen}
       />
     </Drawer>
   );

@@ -26,6 +26,8 @@ import OrderSuccessPage from './components/storefront/OrderSuccessPage';
 import WishlistPage from './components/storefront/WishlistPage';
 import AppSidebar, { getSidebarWidthPx } from './components/layout/AppSidebar';
 import AppTopBar from './components/layout/AppTopBar';
+import AccountUserMenu from './components/layout/AccountUserMenu';
+import SpecialOfferPopup from './components/layout/SpecialOfferPopup';
 import { useSelector } from 'react-redux';
 
 const SIDEBAR_LS_KEY = 'funzo-sidebar-expanded';
@@ -41,6 +43,7 @@ function AppShell() {
       return raw === null ? true : raw === 'true';
     } catch { return true; }
   });
+  const [accountMenu, setAccountMenu] = useState(null);
 
   const toggleSidebar = () => {
     setSidebarExpanded((prev) => {
@@ -66,6 +69,7 @@ function AppShell() {
           role={userRole}
           expanded={sidebarExpanded}
           onToggleExpanded={toggleSidebar}
+          onAccountMenuOpen={(e) => setAccountMenu({ anchorEl: e.currentTarget, source: 'sidebar' })}
         />
       )}
 
@@ -82,6 +86,17 @@ function AppShell() {
           <AppTopBar
             onMenuClick={() => setSideOpen(true)}
             showMenuButton={!isDesktop}
+            onAccountMenuOpen={(e) => setAccountMenu({ anchorEl: e.currentTarget, source: 'header' })}
+          />
+        )}
+
+        {showChrome && (
+          <AccountUserMenu
+            anchorState={accountMenu}
+            onClose={() => setAccountMenu(null)}
+            afterNavigate={() => {
+              if (!isDesktop) setSideOpen(false);
+            }}
           />
         )}
 
@@ -130,6 +145,10 @@ function AppShell() {
         </Box>
 
         {showChrome && <Footer />}
+
+        {showChrome && userRole !== 'admin' && (
+          <SpecialOfferPopup insetLeftPx={isDesktop ? getSidebarWidthPx(sidebarExpanded) : 0} />
+        )}
       </Box>
 
       <Toaster position="top-center" />

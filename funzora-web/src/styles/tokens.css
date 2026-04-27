@@ -1,22 +1,22 @@
 :root {
   /* Colors */
-  --color-primary: #FF6B35;
-  --color-primary-light: #FFF0EB;
-  --color-accent: #7B4FFF;
-  --color-accent-light: #F3EFFF;
-  --color-success: #2ECC71;
-  --color-warning: #F59E0B;
+  --color-primary: #ff6b35;
+  --color-primary-light: #fff0eb;
+  --color-accent: #7b4fff;
+  --color-accent-light: #f3efff;
+  --color-success: #2ecc71;
+  --color-warning: #f59e0b;
 
   /* App canvas — white so storefront sections read clean on one surface */
   --color-bg: #ffffff;
-  --color-surface: #FFFFFF;
-  --color-border: #EBEBEB;
-  --color-border-strong: #D5D5D5;
+  --color-surface: #ffffff;
+  --color-border: #ebebeb;
+  --color-border-strong: #d5d5d5;
 
-  --color-text-primary: #1A1A2E;
+  --color-text-primary: #1a1a2e;
   --color-text-secondary: #555770;
-  --color-text-muted: #9899A6;
-  --color-text-disabled: #C4C4CF;
+  --color-text-muted: #9899a6;
+  --color-text-disabled: #c4c4cf;
 
   /* Spacing scale */
   --space-xs: 4px;
@@ -46,8 +46,8 @@
   --shadow-dropdown: 0 8px 32px rgba(0, 0, 0, 0.14);
 
   /* Typography */
-  --font-display: 'Fredoka One', cursive;
-  --font-body: 'Nunito', sans-serif;
+  --font-display: "Fredoka One", cursive;
+  --font-body: "Nunito", sans-serif;
   --font-size-xs: 11px;
   --font-size-sm: 13px;
   --font-size-base: 15px;

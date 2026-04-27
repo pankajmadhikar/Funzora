@@ -1,16 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Menu, MenuItem, Divider, Badge } from '@mui/material';
-import { PersonRounded, LogoutRounded, ListAltRounded } from '@mui/icons-material';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../../redux/slices/authSlice';
 import { setCartItems } from '../../store/slices/cartSlice';
 import { apiService } from '../../services/apiService';
-import { toast } from 'react-hot-toast';
 import CartBagDrawer from '../storefront/CartBagDrawer';
 import './AppTopBar.css';
 
-export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
+export default function AppTopBar({ onMenuClick, showMenuButton = false, onAccountMenuOpen }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -22,7 +18,6 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
 
   const [search, setSearch] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const isValidUser = user && typeof user === 'object';
   const userRole = isValidUser ? user.role || 'user' : 'user';
@@ -46,15 +41,6 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
   useEffect(() => {
     if (isAuthenticated && userRole !== 'admin') refreshCart();
   }, [isAuthenticated, userRole, cartItemRefresher, refreshCart]);
-
-  const handleLogout = () => {
-    dispatch(logout());
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    toast.success('Logged out');
-    navigate('/login');
-    setAnchorEl(null);
-  };
 
   const goShop = (params = {}) => {
     const q = new URLSearchParams(params).toString();
@@ -121,7 +107,7 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
               </button>
             )}
 
-            <button className="fz-header-action" onClick={(e) => setAnchorEl(e.currentTarget)}>
+            <button type="button" className="fz-header-action" onClick={(e) => onAccountMenuOpen?.(e)}>
               <span className="fz-header-action-icon">👤</span>
               <span className="fz-header-action-label">Account</span>
             </button>
@@ -139,34 +125,6 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
       </header>
 
       <CartBagDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
-
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={() => setAnchorEl(null)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        PaperProps={{ sx: { borderRadius: '14px', boxShadow: '0 8px 32px rgba(0,0,0,0.1)', mt: 1, minWidth: 180 } }}
-      >
-        {isValidUser && (
-          <div style={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}>
-            <div style={{ fontWeight: 800, fontSize: 14, color: '#333' }}>{user.firstname || user.name || 'User'}</div>
-            <div style={{ fontSize: 12, color: '#999' }}>{user.email || ''}</div>
-          </div>
-        )}
-        <MenuItem onClick={() => { setAnchorEl(null); navigate('/profile'); }} sx={{ fontSize: 14, fontWeight: 600, py: 1.25 }}>
-          <PersonRounded sx={{ mr: 1.25, fontSize: 18, color: '#888' }} /> Profile
-        </MenuItem>
-        {userRole !== 'admin' && (
-          <MenuItem onClick={() => { setAnchorEl(null); navigate('/profile'); }} sx={{ fontSize: 14, fontWeight: 600, py: 1.25 }}>
-            <ListAltRounded sx={{ mr: 1.25, fontSize: 18, color: '#888' }} /> My orders
-          </MenuItem>
-        )}
-        <Divider sx={{ my: 0.5 }} />
-        <MenuItem onClick={handleLogout} sx={{ fontSize: 14, fontWeight: 600, py: 1.25, color: '#EF4444' }}>
-          <LogoutRounded sx={{ mr: 1.25, fontSize: 18 }} /> Logout
-        </MenuItem>
-      </Menu>
     </>
   );
 }
