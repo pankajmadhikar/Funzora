@@ -30,6 +30,10 @@
   --color-ui-heading: #1f2937;
   --color-ui-body: #6b7280;
 
+  /* Hero wave strip — warm terracotta titles (not flat black) */
+  --color-hero-wave-title: #b45309;
+  --color-hero-wave-desc: #78716c;
+
   /* Spacing scale */
   --space-xs: 4px;
   --space-sm: 8px;
