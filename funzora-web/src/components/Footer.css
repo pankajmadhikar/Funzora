@@ -4,6 +4,7 @@
   --fz-footer-pink: var(--color-primary);
   --fz-footer-pink-btn: var(--color-primary);
   --fz-footer-help-bg: #fff5f5;
+  --fz-footer-help-border: #fde4e6;
   --fz-footer-border: #f0f0f0;
   --fz-footer-muted: #888888;
   background: #ffffff;
@@ -288,58 +289,69 @@
   color: var(--fz-footer-pink);
 }
 
-/* Help card */
+/* Help card — conversion-focused support */
 .funzora-help-card {
   background: var(--fz-footer-help-bg);
-  border-radius: 24px;
-  padding: clamp(22px, 3vw, 32px);
+  border-radius: 1rem;
+  padding: 1.5rem;
   text-align: center;
-  border: 1px solid rgba(241, 122, 126, 0.12);
+  border: 1px solid var(--fz-footer-help-border);
 }
 
 .funzora-help-card h3 {
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: #c94a52;
-  margin: 0 0 8px;
-}
-
-.funzora-help-card .funzora-help-lead {
-  font-size: 0.9rem;
-  color: #444444;
-  margin: 0 0 4px;
+  font-family: var(--font-body, 'Nunito', sans-serif);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--color-ui-heading, #1f2937);
+  margin: 0 0 0.5rem;
+  letter-spacing: -0.02em;
 }
 
 .funzora-help-card .funzora-help-sub {
-  font-size: 0.82rem;
-  color: #666666;
-  margin: 0 0 16px;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: #6b7280;
+  margin: 0 0 1.25rem;
   line-height: 1.5;
 }
 
 .funzora-whatsapp-btn {
-  display: inline-flex;
+  display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 0.5rem;
   width: 100%;
-  background: var(--fz-footer-pink-btn);
-  color: #ffffff;
+  margin: 0;
   border: none;
-  padding: 14px 18px;
-  border-radius: 999px;
-  font-weight: 800;
-  font-size: 0.9rem;
+  background: linear-gradient(to right, #25d366, #1da851);
+  color: #ffffff;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  font-size: 0.9375rem;
   cursor: pointer;
-  text-decoration: none;
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
   font-family: inherit;
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.1),
+    0 2px 4px -2px rgb(0 0 0 / 0.1);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .funzora-whatsapp-btn:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 8px 20px rgba(255, 118, 123, 0.35);
+  transform: scale(1.02);
+  box-shadow:
+    0 10px 15px -3px rgb(0 0 0 / 0.1),
+    0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+.funzora-whatsapp-btn:active {
+  transform: scale(0.99);
+}
+
+.funzora-whatsapp-icon {
+  flex-shrink: 0;
 }
 
 .funzora-footer-divider {
@@ -363,11 +375,10 @@
 .funzora-newsletter {
   display: flex;
   align-items: stretch;
-  background: #ffffff;
+  background: #f3f4f6;
   padding: 4px;
-  border-radius: 12px;
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
 }
 
 .funzora-newsletter input {
@@ -375,33 +386,41 @@
   padding: 10px 12px;
   flex: 1;
   min-width: 0;
-  font-size: 0.88rem;
+  font-size: 0.875rem;
   font-family: inherit;
   outline: none;
-  border-radius: 10px;
-  background: transparent;
+  border-radius: 0.375rem;
+  background: #ffffff;
+  transition: box-shadow 0.2s ease;
+}
+
+.funzora-newsletter input:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 28%, transparent);
 }
 
 .funzora-newsletter input::placeholder {
-  color: #aaaaaa;
+  color: #9ca3af;
 }
 
 .funzora-subscribe-btn {
-  background: var(--fz-footer-pink-btn);
-  color: #ffffff;
+  background: #e5e7eb;
+  color: #374151;
   border: none;
-  padding: 10px 16px;
-  border-radius: 10px;
-  font-weight: 800;
-  font-size: 0.82rem;
+  padding: 10px 14px;
+  border-radius: 0.375rem;
+  font-weight: 600;
+  font-size: 0.8125rem;
   cursor: pointer;
   flex-shrink: 0;
   font-family: inherit;
-  transition: opacity 0.15s ease;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
 }
 
 .funzora-subscribe-btn:hover {
-  opacity: 0.92;
+  background: #d1d5db;
+  color: #1f2937;
 }
 
 .funzora-newsletter-note {
