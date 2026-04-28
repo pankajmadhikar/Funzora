@@ -24,6 +24,12 @@
   --color-text-muted: #9899a6;
   --color-text-disabled: #c4c4cf;
 
+  /* UI neutrals (dashboards, cards — matches gray scale) */
+  --color-ui-bg-muted: #fafafa;
+  --color-ui-border: #e5e7eb;
+  --color-ui-heading: #1f2937;
+  --color-ui-body: #6b7280;
+
   /* Spacing scale */
   --space-xs: 4px;
   --space-sm: 8px;

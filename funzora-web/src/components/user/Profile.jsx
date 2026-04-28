@@ -1,16 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { CircularProgress } from '@mui/material';
+import { Loader2, Package } from 'lucide-react';
 import { apiService } from '../../services/apiService';
 import { formatPrice } from '../../utils/formatPrice';
 import { logout } from '../../redux/slices/authSlice';
 import { toast } from 'react-hot-toast';
+import { AccountLayout, AccountTabs, InfoCard, ProfileCard } from '../account';
+import { ICON_STROKE } from '../../constants/appIconTokens';
 
-const NAV_ITEMS = [
-  { id: 'orders', icon: '📦', label: 'My Orders' },
-  { id: 'settings', icon: '⚙', label: 'Account Settings' },
+const ACCOUNT_TABS = [
+  { id: 'orders', label: 'Orders' },
+  { id: 'info', label: 'Account info' },
+  { id: 'addresses', label: 'Addresses' },
 ];
+
+function getStatusStyle(status) {
+  const s = (status || '').toLowerCase();
+  if (s === 'delivered') {
+    return {
+      background: 'var(--color-primary-soft)',
+      color: 'var(--color-primary)',
+      border: '1px solid var(--color-primary-light)',
+    };
+  }
+  if (s === 'cancelled') {
+    return { background: '#FEF2F2', color: '#EF4444', border: '1px solid #FECACA' };
+  }
+  return {
+    background: 'var(--color-ui-bg-muted)',
+    color: 'var(--color-ui-body)',
+    border: '1px solid var(--color-ui-border)',
+  };
+}
 
 function Profile() {
   const { user } = useSelector((state) => state.auth);
@@ -19,22 +41,24 @@ function Profile() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [activeTab, setActiveTab] = useState('orders');
+  const [tab, setTab] = useState('orders');
+
+  const loadOrders = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await apiService.getUserOrders();
+      setOrders(response.data || []);
+      setError(null);
+    } catch (err) {
+      setError(err.message || 'Failed to load orders');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-        const response = await apiService.getUserOrders();
-        setOrders(response.data || []);
-        setError(null);
-      } catch (err) {
-        setError(err.message || 'Failed to load orders');
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
+    loadOrders();
+  }, [loadOrders]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -44,153 +68,151 @@ function Profile() {
     navigate('/login');
   };
 
-  const getStatusStyle = (status) => {
-    const s = (status || '').toLowerCase();
-    if (s === 'delivered') return { background: '#EAFAF1', color: 'var(--color-success)', border: '1px solid #D5F5E3' };
-    if (s === 'cancelled') return { background: '#FEF2F2', color: '#EF4444', border: '1px solid #FECACA' };
-    return { background: '#FEF9EC', color: 'var(--color-warning)', border: '1px solid #FDE68A' };
+  const onEditField = (field) => {
+    toast(`Editing ${field} is coming soon.`);
+  };
+
+  const onEditProfile = () => {
+    toast('Profile editor is coming soon.');
   };
 
   const initials = `${(user?.firstname || user?.name || 'U')[0]}${(user?.lastname || '')[0] || ''}`.toUpperCase();
-  const displayName = user?.firstname ? `${user.firstname} ${user.lastname || ''}`.trim() : (user?.name || 'User');
-  const memberSince = new Date(user?.createdAt || Date.now()).toLocaleDateString('en-IN', { month: 'long', year: 'numeric' });
+  const displayName = user?.firstname
+    ? `${user.firstname} ${user.lastname || ''}`.trim()
+    : (user?.name || 'User');
+  const memberSince = new Date(user?.createdAt || Date.now()).toLocaleDateString('en-IN', {
+    month: 'long',
+    year: 'numeric',
+  });
+  const accountType = user?.role === 'admin' ? 'Administrator' : 'Customer';
 
   return (
-    <div className="bb-page">
-      <h1 className="text-title bb-head" style={{ marginBottom: 'var(--space-xl)' }}>My Account</h1>
+    <AccountLayout
+      title="My Account"
+      sidebar={
+        <div className="flex flex-col gap-4">
+          <ProfileCard
+            initials={initials}
+            name={displayName}
+            email={user?.email || ''}
+            onEditProfile={onEditProfile}
+          />
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="w-full rounded-xl py-2.5 text-sm font-medium text-red-500 transition-colors duration-200 hover:bg-red-50"
+          >
+            Sign out
+          </button>
+        </div>
+      }
+    >
+      <div className="rounded-2xl border border-[var(--color-ui-border)] bg-white p-5 shadow-sm sm:p-6 lg:p-8">
+        <AccountTabs tabs={ACCOUNT_TABS} value={tab} onChange={setTab} />
 
-      <div className="profile-grid">
-        {/* Left sidebar */}
-        <div className="profile-sidebar">
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 'var(--space-lg)' }}>
-            <div className="profile-avatar">{initials}</div>
-            <div className="text-heading" style={{ fontSize: 'var(--font-size-md)', marginTop: 'var(--space-md)' }}>{displayName}</div>
-            <div className="text-label" style={{ marginTop: 2 }}>{user?.email || ''}</div>
-            {user?.phone && <div className="text-label" style={{ marginTop: 2 }}>{user.phone}</div>}
-          </div>
+        {tab === 'orders' && (
+          <section aria-labelledby="orders-heading">
+            <h2 id="orders-heading" className="text-lg font-medium text-[var(--color-ui-heading)]">
+              Order history
+            </h2>
 
-          <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: 'var(--space-md)' }}>
-            {/* Desktop nav */}
-            <div className="profile-nav-desktop">
-              {NAV_ITEMS.map((item) => (
+            {loading ? (
+              <div className="flex justify-center py-16">
+                <Loader2 size={40} strokeWidth={ICON_STROKE} className="animate-spin text-[var(--color-primary)]" aria-hidden />
+                <span className="sr-only">Loading orders</span>
+              </div>
+            ) : error || orders.length === 0 ? (
+              <div className="mt-8 flex flex-col items-center rounded-xl border border-dashed border-[var(--color-ui-border)] bg-[var(--color-ui-bg-muted)] px-6 py-14 text-center transition-shadow duration-200 hover:shadow-sm">
+                <Package size={48} strokeWidth={ICON_STROKE} className="text-gray-300" aria-hidden />
+                <p className="mt-4 text-base font-semibold text-[var(--color-ui-heading)]">
+                  {error ? 'Could not load orders' : 'No orders yet'}
+                </p>
+                <p className="mt-2 max-w-sm text-sm text-[var(--color-ui-body)]">
+                  {error ? 'Please try again later.' : 'Your placed orders will appear here.'}
+                </p>
                 <button
-                  key={item.id}
-                  className={`profile-nav-item${activeTab === item.id ? ' active' : ''}`}
-                  onClick={() => setActiveTab(item.id)}
+                  type="button"
+                  className="mt-6 rounded-xl bg-[var(--color-primary)] px-6 py-2.5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-[var(--color-primary-hover)]"
+                  onClick={() => navigate('/shop')}
                 >
-                  <span>{item.icon}</span>
-                  <span>{item.label}</span>
+                  Start shopping
                 </button>
-              ))}
-              <button className="profile-nav-item profile-nav-item--danger" onClick={handleLogout}>
-                <span>🚪</span>
-                <span>Sign Out</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile nav strip */}
-        <div className="profile-nav-mobile">
-          {NAV_ITEMS.map((item) => (
-            <button
-              key={item.id}
-              className={`profile-nav-mobile-item${activeTab === item.id ? ' active' : ''}`}
-              onClick={() => setActiveTab(item.id)}
-            >
-              <span>{item.icon}</span>
-              <span>{item.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Right content */}
-        <div className="profile-content">
-          {activeTab === 'orders' && (
-            <div>
-              <h2 className="bb-head" style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-lg)' }}>Order History</h2>
-
-              {loading ? (
-                <div style={{ display: 'flex', justifyContent: 'center', padding: 'var(--space-2xl)' }}>
-                  <CircularProgress sx={{ color: 'var(--color-primary)' }} />
-                </div>
-              ) : error || orders.length === 0 ? (
-                <div className="empty-state">
-                  <span className="empty-state-icon">📦</span>
-                  <span className="empty-state-title">{error ? 'Could not load orders' : 'No orders yet'}</span>
-                  <span className="empty-state-sub">
-                    {error ? 'Please try again later.' : 'Your placed orders will appear here'}
-                  </span>
-                  <button className="btn btn--primary" onClick={() => navigate('/shop')}>Start Shopping →</button>
-                </div>
-              ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-                  {orders.map((order) => (
-                    <div key={order._id} className="order-card">
+              </div>
+            ) : (
+              <ul className="mt-6 flex flex-col gap-4">
+                {orders.map((order) => (
+                  <li key={order._id}>
+                    <article className="order-card transition-shadow duration-200 hover:shadow-md">
                       <div className="order-card-header">
                         <div>
-                          <span className="text-label">ORDER ID</span>
-                          <span className="text-heading" style={{ display: 'block', marginTop: 2 }}>
+                          <span className="text-label">Order ID</span>
+                          <span className="text-heading mt-0.5 block text-[var(--color-ui-heading)]">
                             #{String(order._id).slice(-8)}
                           </span>
                         </div>
-                        <div style={{ textAlign: 'right' }}>
-                          <span className="text-label">{new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                          <span className="order-status-badge" style={getStatusStyle(order.status)}>
+                        <div className="text-right">
+                          <span className="text-label">
+                            {new Date(order.createdAt).toLocaleDateString('en-IN', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric',
+                            })}
+                          </span>
+                          <span className="order-status-badge mt-1 inline-block rounded-lg px-2 py-0.5 text-xs font-semibold capitalize" style={getStatusStyle(order.status)}>
                             {order.status}
                           </span>
                         </div>
                       </div>
-                      <div className="order-card-items">
+                      <div className="order-card-items text-[var(--color-ui-body)]">
                         {order.items?.map((it, idx) => (
-                          <span key={it._id || idx} className="text-body" style={{ fontSize: 'var(--font-size-sm)' }}>
-                            {it.product?.name || 'Item'}{idx < order.items.length - 1 ? ', ' : ''}
+                          <span key={it._id || idx} className="text-sm">
+                            {it.product?.name || 'Item'}
+                            {idx < order.items.length - 1 ? ', ' : ''}
                           </span>
                         ))}
                       </div>
                       <div className="order-card-footer">
-                        <span className="text-price" style={{ fontSize: 'var(--font-size-md)' }}>{formatPrice(order.totalAmount)}</span>
+                        <span className="text-lg font-semibold text-[var(--color-primary)]">{formatPrice(order.totalAmount)}</span>
                       </div>
-                    </div>
-                  ))}
-                </div>
-              )}
+                    </article>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
+        )}
+
+        {tab === 'info' && (
+          <section aria-labelledby="account-info-heading">
+            <h2 id="account-info-heading" className="text-lg font-medium text-[var(--color-ui-heading)]">
+              Account info
+            </h2>
+            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <InfoCard label="Account type" value={accountType} onEdit={() => onEditField('account type')} />
+              <InfoCard label="Email" value={user?.email} onEdit={() => onEditField('email')} />
+              <InfoCard label="Phone" value={user?.phone || '—'} onEdit={() => onEditField('phone')} />
+              <InfoCard label="Member since" value={memberSince} />
             </div>
-          )}
-
-          {activeTab === 'settings' && (
-            <div>
-              <h2 className="bb-head" style={{ fontSize: 'var(--font-size-lg)', marginBottom: 'var(--space-lg)' }}>Account Settings</h2>
-
-              <div className="account-info-grid">
-                <div className="account-info-item">
-                  <div className="account-info-label">Account Type</div>
-                  <div className="account-info-value">{user?.role === 'admin' ? 'Administrator' : 'Customer'}</div>
-                </div>
-                <div className="account-info-item">
-                  <div className="account-info-label">Member Since</div>
-                  <div className="account-info-value">{memberSince}</div>
-                </div>
-                <div className="account-info-item">
-                  <div className="account-info-label">Email</div>
-                  <div className="account-info-value">{user?.email || '—'}</div>
-                </div>
-                <div className="account-info-item">
-                  <div className="account-info-label">Phone</div>
-                  <div className="account-info-value">{user?.phone || '—'}</div>
-                </div>
-              </div>
-
-              <div style={{ marginTop: 'var(--space-xl)' }}>
-                <button className="btn btn--outline" style={{ color: '#EF4444', borderColor: '#EF4444' }} onClick={handleLogout}>
-                  Sign Out
-                </button>
-              </div>
+            <div className="mt-10 border-t border-[var(--color-ui-border)] pt-6">
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="rounded-xl border border-red-200 bg-transparent px-5 py-2.5 text-sm font-semibold text-red-500 transition-colors duration-200 hover:bg-red-50"
+              >
+                Sign out
+              </button>
             </div>
-          )}
-        </div>
+          </section>
+        )}
+
+        {tab === 'addresses' && (
+          <section className="rounded-xl border border-dashed border-[var(--color-ui-border)] bg-[var(--color-ui-bg-muted)] px-6 py-14 text-center">
+            <p className="text-base font-medium text-[var(--color-ui-heading)]">Addresses</p>
+            <p className="mt-2 text-sm text-[var(--color-ui-body)]">Saved addresses will appear here soon.</p>
+          </section>
+        )}
       </div>
-    </div>
+    </AccountLayout>
   );
 }
 
