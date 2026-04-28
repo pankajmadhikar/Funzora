@@ -163,7 +163,7 @@ export default function ToyProductCard({ product: raw, compact = false }) {
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col px-4 pb-3 pt-2">
-        <h3 className="line-clamp-2 text-base font-medium leading-snug text-gray-900">{product.name}</h3>
+        <h3 className="line-clamp-2 text-base font-medium leading-snug text-gray-900 text-sm font-medium">{product.name}</h3>
 
         <div className="mt-1.5 flex items-center justify-between gap-2 text-xs text-gray-400">
           <span className="inline-flex min-w-0 items-center gap-1">
@@ -177,7 +177,7 @@ export default function ToyProductCard({ product: raw, compact = false }) {
         </div>
 
         <div className="mt-2 flex flex-wrap items-baseline gap-2">
-          <span className={`text-lg font-bold ${primaryCls}`}>{formatPrice(product.price)}</span>
+          <span className={`text-lg ${primaryCls} text-sm font-medium`}>{formatPrice(product.price)}</span>
           {product.mrp > product.price && (
             <span className="text-sm font-medium text-gray-300 line-through">{formatPrice(product.mrp)}</span>
           )}
@@ -201,7 +201,7 @@ export default function ToyProductCard({ product: raw, compact = false }) {
             >
               <button
                 type="button"
-                className="px-3 text-sm font-semibold text-gray-500 transition hover:bg-gray-50 disabled:opacity-40"
+                className="px-3 text-sm font-semibold text-gray-500 transition hover:bg-gray-50 disabled:opacity-40 "
                 onClick={(e) => changeCartQty(-1, e)}
                 disabled={updatingQty}
                 aria-label="Decrease quantity"
@@ -225,7 +225,7 @@ export default function ToyProductCard({ product: raw, compact = false }) {
         </div>
       </div>
 
-      <button
+      {/* <button
         type="button"
         className="group/qv flex w-full items-center justify-center gap-1.5 border-t border-neutral-100 bg-neutral-50/80 px-3 py-2 text-xs font-medium text-gray-400 transition hover:bg-neutral-100 hover:text-gray-600"
         onClick={(e) => {
@@ -235,7 +235,7 @@ export default function ToyProductCard({ product: raw, compact = false }) {
       >
         <Eye size={ICON_SIZES.sm} strokeWidth={ICON_STROKE} className="shrink-0" aria-hidden />
         Quick view
-      </button>
+      </button> */}
     </div>
   );
 }
