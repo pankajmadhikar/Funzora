@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Gift, Heart, Leaf, Shield, Sparkles } from 'lucide-react';
+import { ArrowRight, Gift, Heart, Leaf, Shield, Sparkles } from 'lucide-react';
 import heroBg from '../../assets/Banners/hero-bg-toys.png';
 import { ICON_STROKE, ICON_SIZES } from '../../constants/appIconTokens';
 import './HeroSection.css';
@@ -34,7 +34,7 @@ export default function HeroSection() {
         </p>
 
         <button type="button" className="hero-banner-cta" onClick={() => navigate('/shop')}>
-          SHOP NOW <span className="hero-banner-cta-arrow">›</span>
+          SHOP NOW <ArrowRight size={16} strokeWidth={ICON_STROKE} className="hero-banner-cta-icon" aria-hidden />
         </button>
       </div>
 

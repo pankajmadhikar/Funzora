@@ -79,7 +79,6 @@ export default function ShopPage() {
 
   const catObj = TOY_CATS.find((c) => c.id === selCat);
   const catLabel = selCat === 'all' ? 'All Toys' : catObj?.label || '';
-  const catIcon = selCat === 'all' ? '🎁' : catObj?.icon || '🎁';
 
   return (
     <div className="bb-page">
@@ -93,8 +92,8 @@ export default function ShopPage() {
         gap: 'var(--space-md)',
       }}>
         <div>
-          <h1 className="bb-head" style={{ fontSize: 'var(--font-size-2xl)', color: 'var(--color-text-primary)' }}>
-            {catIcon} {catLabel}
+          <h1 className="section-title text-[22px] sm:text-[24px]">
+            {catLabel}
           </h1>
           <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)', marginTop: 'var(--space-xs)', fontWeight: 600 }}>
             {filtP.length} toy{filtP.length !== 1 ? 's' : ''} found · Live from your catalog

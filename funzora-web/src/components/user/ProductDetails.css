@@ -28,7 +28,7 @@
   gap: 4px;
   font-size: 13px;
   font-weight: 700;
-  color: #f06292;
+  color: var(--color-primary);
   text-decoration: none;
   margin-bottom: 20px;
   transition: color 0.15s;
@@ -150,7 +150,7 @@
 
 .pd-nav-arrow:hover {
   background: #fff;
-  color: #f06292;
+  color: var(--color-primary);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
@@ -184,7 +184,7 @@
 }
 
 .pd-thumb.active {
-  border-color: #f06292;
+  border-color: var(--color-primary);
 }
 
 .pd-thumb:hover:not(.active) {
@@ -259,7 +259,7 @@
 .pd-price {
   font-family: var(--font-display);
   font-size: 40px;
-  color: #f06292;
+  color: var(--color-primary);
   line-height: 1;
 }
 
@@ -444,8 +444,8 @@
 
 .pd-btn-add {
   background: #fff;
-  border: 2px solid #f06292;
-  color: #f06292;
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
 }
 
 .pd-btn-add:hover {
@@ -496,7 +496,7 @@
 
 .pd-btn-wish.on {
   background: #fde8f4;
-  border-color: #f06292;
+  border-color: var(--color-primary);
   color: #ec4899;
 }
 

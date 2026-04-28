@@ -86,7 +86,7 @@ function ProductDetails() {
   if (loading) {
     return (
       <div className="pd-loading">
-        <CircularProgress sx={{ color: '#f06292' }} />
+        <CircularProgress sx={{ color: 'var(--color-primary)' }} />
       </div>
     );
   }
@@ -247,8 +247,8 @@ function ProductDetails() {
       {related.length > 0 && (
         <div className="pd-related">
           <div className="section-header">
-            <h2 className="section-title bb-head">
-              You may also <span style={{ color: '#f06292' }}>like</span>
+            <h2 className="section-title">
+              You may also <span className="text-[var(--color-primary)]">like</span>
             </h2>
             <Link to="/shop" className="section-view-all">View all →</Link>
           </div>

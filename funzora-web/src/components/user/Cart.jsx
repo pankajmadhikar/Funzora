@@ -1,13 +1,25 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { CircularProgress } from '@mui/material';
+import {
+  AlertCircle,
+  Loader2,
+  Lock,
+  Package,
+  RotateCcw,
+  ShoppingCart,
+  Trash2,
+  Truck,
+} from 'lucide-react';
 import { apiService } from '../../services/apiService';
 import { toast } from 'react-hot-toast';
 import { setCartItems } from '../../store/slices/cartSlice';
 import { enrichProduct } from '../../utils/enrichProduct';
 import { formatPrice } from '../../utils/formatPrice';
 import { FREE_SHIP_AT, SHIPPING_FLAT } from '../../config/toyStore';
+import { ICON_STROKE, ICON_SIZES } from '../../constants/appIconTokens';
+
+const fontCart = "font-['Inter',var(--font-body),sans-serif]";
 
 const Cart = () => {
   const navigate = useNavigate();
@@ -32,7 +44,9 @@ const Cart = () => {
     }
   }, [dispatch]);
 
-  useEffect(() => { fetchCartItems(); }, [fetchCartItems]);
+  useEffect(() => {
+    fetchCartItems();
+  }, [fetchCartItems]);
 
   const handleUpdateQuantity = async (item, action) => {
     try {
@@ -62,53 +76,76 @@ const Cart = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '60vh' }}>
-        <CircularProgress sx={{ color: 'var(--color-primary)' }} />
+      <div className={`flex min-h-[60vh] items-center justify-center ${fontCart}`}>
+        <Loader2
+          size={36}
+          strokeWidth={ICON_STROKE}
+          className="animate-spin text-[var(--color-primary)]"
+          aria-hidden
+        />
+        <span className="sr-only">Loading cart</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bb-page">
+      <div className={`bb-page ${fontCart}`}>
         <div className="empty-state">
-          <span className="empty-state-icon">⚠️</span>
+          <AlertCircle
+            size={48}
+            strokeWidth={ICON_STROKE}
+            className="mx-auto text-neutral-400"
+            aria-hidden
+          />
           <span className="empty-state-title">Something went wrong</span>
           <span className="empty-state-sub">{error}</span>
-          <button className="btn btn--primary" onClick={fetchCartItems}>Try again</button>
+          <button type="button" className="btn btn--primary" onClick={fetchCartItems}>
+            Try again
+          </button>
         </div>
       </div>
     );
   }
 
   const cartItems = cartData?.data?.items || [];
-  const subtotal = cartItems.reduce((sum, item) => sum + (item?.productId?.price || 0) * (item?.quantity || 0), 0);
+  const subtotal = cartItems.reduce(
+    (sum, item) => sum + (item?.productId?.price || 0) * (item?.quantity || 0),
+    0,
+  );
   const toFree = Math.max(0, FREE_SHIP_AT - subtotal);
   const ship = subtotal >= FREE_SHIP_AT ? 0 : SHIPPING_FLAT;
   const total = subtotal + ship;
 
   if (!cartItems || cartItems.length === 0) {
     return (
-      <div className="bb-page">
-        <h1 className="text-title bb-head" style={{ marginBottom: 'var(--space-xl)' }}>Shopping Cart</h1>
-        <div className="empty-state" style={{ padding: 'var(--space-3xl) var(--space-lg)' }}>
-          <span style={{ fontSize: 64 }}>🛒</span>
+      <div className={`bb-page ${fontCart}`}>
+        <h1 className="text-title bb-head mb-6">Shopping cart</h1>
+        <div className="empty-state px-6 py-16">
+          <ShoppingCart
+            size={56}
+            strokeWidth={ICON_STROKE}
+            className="mx-auto text-neutral-300"
+            aria-hidden
+          />
           <span className="empty-state-title">Your bag is empty</span>
-          <span className="empty-state-sub">Explore toys under ₹100</span>
-          <button className="btn btn--primary" onClick={() => navigate('/shop')}>Shop now →</button>
+          <span className="empty-state-sub text-neutral-500">Browse the shop and add toys you love.</span>
+          <button type="button" className="btn btn--primary" onClick={() => navigate('/shop')}>
+            Shop now
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bb-page">
-      <h1 className="text-title bb-head" style={{ marginBottom: 'var(--space-xl)' }}>
-        Shopping Cart <span style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-lg)' }}>({cartItems.length})</span>
+    <div className={`bb-page ${fontCart}`}>
+      <h1 className="text-title bb-head mb-6 flex flex-wrap items-baseline gap-2">
+        Shopping cart
+        <span className="text-lg font-semibold text-neutral-400">({cartItems.length})</span>
       </h1>
 
       <div className="cart-page-grid">
-        {/* Left: Cart items */}
         <div className="cart-page-items">
           {cartItems.map((item) => {
             const raw = item.productId;
@@ -117,76 +154,93 @@ const Cart = () => {
             const u = ep?._ui;
             return (
               <div key={item._id} className="cart-page-row">
-                <div className="cart-page-thumb" style={{ background: u?.grad || 'var(--color-bg)' }}>
+                <div
+                  className="cart-page-thumb flex items-center justify-center"
+                  style={{
+                    background: u?.grad || 'var(--color-bg)',
+                  }}
+                >
                   {raw.images?.[0] ? (
-                    <img src={raw.images[0]} alt={raw.name} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    <img
+                      src={raw.images[0]}
+                      alt={raw.name}
+                      className="h-full w-full object-contain"
+                    />
                   ) : (
-                    <span style={{ fontSize: 28 }}>{u?.emoji || '🎁'}</span>
+                    <Package
+                      size={ICON_SIZES.lg}
+                      strokeWidth={ICON_STROKE}
+                      className="text-neutral-400"
+                      aria-hidden
+                    />
                   )}
                 </div>
 
-                <div className="cart-page-info">
-                  <span className="text-heading" style={{ display: 'block', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <div className="cart-page-info min-w-0">
+                  <span className="block truncate text-base font-semibold text-neutral-900">
                     {raw.name}
                   </span>
-                  <span className="text-label" style={{ marginTop: 2 }}>
+                  <span className="mt-0.5 block text-xs text-neutral-400">
                     Age {u?.age || '3+'} · {u?.catMeta?.label || 'Toy'}
                   </span>
-                  {/* Mobile price */}
-                  <span className="cart-page-price-mobile text-price" style={{ marginTop: 4 }}>
+                  <span className="cart-page-price-mobile mt-1 text-lg font-bold text-[var(--color-primary)]">
                     {formatPrice(raw.price * item.quantity)}
                   </span>
                 </div>
 
                 <div className="cart-page-qty">
                   <button
+                    type="button"
                     className="qty-btn"
                     disabled={updating || item.quantity <= 1}
                     onClick={() => handleUpdateQuantity(item, 'decrease')}
-                  >−</button>
-                  <span style={{ fontWeight: 800, minWidth: 20, textAlign: 'center', fontSize: 'var(--font-size-base)' }}>
+                  >
+                    −
+                  </button>
+                  <span className="min-w-[1.5rem] text-center text-sm font-bold text-neutral-800">
                     {item.quantity}
                   </span>
                   <button
+                    type="button"
                     className="qty-btn"
                     disabled={updating}
                     onClick={() => handleUpdateQuantity(item, 'increase')}
-                    style={{ borderColor: 'var(--color-primary)', color: 'var(--color-primary)' }}
-                  >+</button>
+                  >
+                    +
+                  </button>
                 </div>
 
-                <span className="cart-page-price text-price">
+                <span className="cart-page-price text-lg font-bold text-[var(--color-primary)]">
                   {formatPrice(raw.price * item.quantity)}
                 </span>
 
                 <button
-                  className="cart-page-delete"
+                  type="button"
+                  className="cart-page-delete inline-flex items-center justify-center text-neutral-400 transition hover:text-[var(--color-primary)]"
                   disabled={updating}
                   onClick={() => handleRemoveItem(item)}
-                >🗑</button>
+                  aria-label="Remove item"
+                >
+                  <Trash2 size={ICON_SIZES.md} strokeWidth={ICON_STROKE} />
+                </button>
               </div>
             );
           })}
         </div>
 
-        {/* Right: Order summary */}
         <div className="cart-summary-card">
-          <h2 className="bb-head" style={{ fontSize: 'var(--font-size-md)', color: 'var(--color-text-primary)', marginBottom: 'var(--space-lg)' }}>
-            Order Summary
-          </h2>
+          <h2 className="bb-head mb-4 text-base text-neutral-900">Order summary</h2>
 
-          {/* Item lines */}
-          <div style={{ marginBottom: 'var(--space-md)' }}>
+          <div className="mb-4 space-y-2">
             {cartItems.map((item) => {
               const raw = item.productId;
               if (!raw) return null;
-              const ep = enrichProduct(raw);
               return (
                 <div key={item._id} className="cart-summary-line">
-                  <span className="text-body" style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {ep?._ui?.emoji} {raw.name}
+                  <span className="min-w-0 flex-1 truncate text-sm text-neutral-600">{raw.name}</span>
+                  <span className="shrink-0 text-sm font-bold text-neutral-900">
+                    {formatPrice(raw.price * item.quantity)}
                   </span>
-                  <span style={{ fontWeight: 800, flexShrink: 0 }}>{formatPrice(raw.price * item.quantity)}</span>
                 </div>
               );
             })}
@@ -194,46 +248,65 @@ const Cart = () => {
 
           <div className="cart-summary-divider" />
 
-          {/* Shipping nudge */}
           {subtotal > 0 && toFree > 0 && (
-            <div className="shipping-nudge">
-              <div className="shipping-nudge-text">🚚 Add {formatPrice(toFree)} more for FREE shipping!</div>
+            <div className="shipping-nudge mb-4">
+              <div className="mb-2 flex items-start gap-2 text-sm font-medium leading-snug text-neutral-600">
+                <Truck size={ICON_SIZES.sm} strokeWidth={ICON_STROKE} className="mt-0.5 shrink-0 text-neutral-400" aria-hidden />
+                <span>
+                  Add <strong className="font-semibold text-[var(--color-primary)]">{formatPrice(toFree)}</strong> more for{' '}
+                  <span className="font-semibold text-[var(--color-primary)]">FREE</span> shipping
+                </span>
+              </div>
               <div className="shipping-nudge-bar">
-                <div className="shipping-nudge-fill" style={{ width: `${Math.min(100, (subtotal / FREE_SHIP_AT) * 100)}%` }} />
+                <div
+                  className="shipping-nudge-fill"
+                  style={{ width: `${Math.min(100, (subtotal / FREE_SHIP_AT) * 100)}%` }}
+                />
               </div>
             </div>
           )}
 
           <div className="cart-summary-line">
-            <span className="text-body">Subtotal</span>
-            <span style={{ fontWeight: 800 }}>{formatPrice(subtotal)}</span>
+            <span className="text-sm text-neutral-600">Subtotal</span>
+            <span className="text-sm font-bold text-neutral-900">{formatPrice(subtotal)}</span>
           </div>
           <div className="cart-summary-line">
-            <span className="text-body">Shipping</span>
-            <span style={{ fontWeight: 800, color: ship === 0 ? 'var(--color-success)' : 'var(--color-text-primary)' }}>
+            <span className="text-sm text-neutral-600">Shipping</span>
+            <span
+              className={`text-sm font-bold ${ship === 0 ? 'text-[var(--color-primary)]' : 'text-neutral-900'}`}
+            >
               {ship === 0 ? 'FREE' : formatPrice(ship)}
             </span>
           </div>
 
           <div className="cart-summary-divider" />
 
-          <div className="cart-summary-line" style={{ marginBottom: 'var(--space-lg)' }}>
-            <span className="bb-head" style={{ fontSize: 'var(--font-size-lg)', color: 'var(--color-text-primary)' }}>Total</span>
-            <span className="bb-head text-price" style={{ fontSize: 'var(--font-size-lg)' }}>{formatPrice(total)}</span>
+          <div className="cart-summary-line mb-6">
+            <span className="bb-head text-lg text-neutral-900">Total</span>
+            <span className="bb-head text-lg font-bold text-[var(--color-primary)]">{formatPrice(total)}</span>
           </div>
 
           <button
-            className="btn btn--primary btn--full cart-checkout-btn"
+            type="button"
+            className="btn btn--primary btn--full cart-checkout-btn rounded-xl font-semibold disabled:opacity-50"
             disabled={cartItems.length === 0}
             onClick={() => navigate('/checkout')}
           >
-            Proceed to Checkout
+            Proceed to checkout
           </button>
 
-          <div className="cart-trust-line">
-            <span>🔒 Secure checkout</span>
-            <span>·</span>
-            <span>🔄 7-day returns</span>
+          <div className="cart-trust-line mt-4 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-xs text-neutral-400">
+            <span className="inline-flex items-center gap-1.5">
+              <Lock size={14} strokeWidth={ICON_STROKE} className="shrink-0" aria-hidden />
+              Secure checkout
+            </span>
+            <span className="text-neutral-300" aria-hidden>
+              ·
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <RotateCcw size={14} strokeWidth={ICON_STROKE} className="shrink-0" aria-hidden />
+              7-day returns
+            </span>
           </div>
         </div>
       </div>

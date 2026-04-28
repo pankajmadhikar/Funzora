@@ -78,7 +78,7 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
 
           <Link to={userRole === 'admin' ? '/admin' : '/'} className="fz-header-logo group" onClick={() => setSearch('')}>
             <div className="fz-header-logo-icon">
-              <Sparkles size={ICON_SIZES.lg} strokeWidth={ICON_STROKE} className="text-neutral-400 transition-colors group-hover:text-orange-500" aria-hidden />
+              <Sparkles size={ICON_SIZES.lg} strokeWidth={ICON_STROKE} className="text-neutral-400 transition-colors group-hover:text-[var(--color-primary)]" aria-hidden />
             </div>
             <div className="fz-header-logo-text">
               <span className="fz-header-logo-name">

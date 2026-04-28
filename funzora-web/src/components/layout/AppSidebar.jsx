@@ -82,8 +82,8 @@ function NavItem({ item, active, expanded, onNavigate }) {
         'group relative flex w-full items-center rounded-xl text-left text-[13px] font-semibold transition-all duration-200',
         expanded ? 'gap-3 px-3 py-2.5' : 'justify-center px-2 py-2.5',
         active
-          ? 'bg-gradient-to-r from-orange-50/95 to-rose-50/95 font-bold text-orange-900 shadow-[0_1px_3px_rgba(0,0,0,0.05)] before:absolute before:left-0 before:top-1/2 before:h-6 before:w-[3px] before:-translate-y-1/2 before:rounded-r before:bg-orange-500'
-          : 'text-neutral-800 hover:bg-neutral-100/90 hover:text-neutral-900',
+          ? 'bg-[var(--color-primary-soft)] font-semibold text-[var(--color-primary)] shadow-[0_1px_3px_rgba(0,0,0,0.05)] before:absolute before:left-0 before:top-1/2 before:h-6 before:w-[3px] before:-translate-y-1/2 before:rounded-r before:bg-[var(--color-primary)]'
+          : 'text-neutral-600 hover:bg-neutral-100/90 hover:text-neutral-800',
       ].join(' ')}
     >
       <Icon
@@ -91,7 +91,7 @@ function NavItem({ item, active, expanded, onNavigate }) {
         strokeWidth={active ? 2.25 : ICON_STROKE}
         className={[
           'shrink-0 transition-colors',
-          active ? 'text-orange-500' : 'text-neutral-400 group-hover:text-neutral-600',
+          active ? 'text-[var(--color-primary)]' : 'text-neutral-400 group-hover:text-neutral-600',
         ].join(' ')}
         aria-hidden
       />
@@ -177,7 +177,7 @@ function SidebarContent({ role, onNav, pathname, search, expanded, onToggle, onA
           type="button"
           onClick={onToggle}
           aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[#ff8a6a] to-[#f06292] text-white shadow-[0_2px_10px_rgba(240,98,146,0.32)] transition hover:brightness-[1.03] active:scale-[0.98]"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[var(--color-primary)] text-white shadow-sm transition hover:bg-[var(--color-primary-hover)] active:scale-[0.98]"
         >
           <Menu size={ICON_SIZES.lg} strokeWidth={ICON_STROKE} aria-hidden />
         </button>
@@ -198,7 +198,7 @@ function SidebarContent({ role, onNav, pathname, search, expanded, onToggle, onA
           aria-haspopup="menu"
           title={expanded ? undefined : 'Account'}
           className={[
-            'group flex w-full items-center rounded-xl border border-neutral-200/70 bg-white text-left text-[13px] font-bold text-neutral-700 transition hover:border-orange-200/80 hover:bg-white hover:text-orange-700',
+            'group flex w-full items-center rounded-xl border border-neutral-200/70 bg-white text-left text-[13px] font-semibold text-neutral-600 transition hover:border-[var(--color-primary-light)] hover:bg-white hover:text-[var(--color-primary)]',
             expanded ? 'gap-3 px-3 py-2.5' : 'justify-center px-2 py-2.5',
           ].join(' ')}
         >

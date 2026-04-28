@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
 import { enrichProducts } from '../../utils/enrichProduct';
@@ -33,8 +34,9 @@ export default function WishlistPage() {
   return (
     <div className="bb-page">
       <div style={{ marginBottom: 'var(--space-xl)' }}>
-        <h1 className="bb-head" style={{ fontSize: 'var(--font-size-2xl)', color: 'var(--color-text-primary)' }}>
-          ❤️ Wishlist
+        <h1 className="section-title inline-flex items-center gap-2 text-[22px] sm:text-[24px]">
+          <Heart size={22} strokeWidth={2} className="shrink-0 text-[var(--color-primary)]" aria-hidden />
+          Wishlist
         </h1>
         <p style={{ color: 'var(--color-text-muted)', fontSize: 'var(--font-size-sm)', marginTop: 'var(--space-xs)', fontWeight: 600 }}>
           {enriched.length} saved toy{enriched.length !== 1 ? 's' : ''}

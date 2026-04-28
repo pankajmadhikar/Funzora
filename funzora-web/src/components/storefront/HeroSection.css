@@ -14,7 +14,7 @@
   display: flex;
   align-items: center;
   overflow: hidden;
-  background-color: #fdf6f0;
+  background-color: var(--color-primary-soft);
 }
 
 /* ── Left text content ── */
@@ -33,14 +33,14 @@
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 800;
-  color: #7ab887;
+  color: var(--color-text-muted);
   letter-spacing: 1.5px;
   margin-bottom: 16px;
 }
 
 .hero-banner-tagline-heart {
   flex-shrink: 0;
-  color: #ef8d9c;
+  color: var(--color-primary);
 }
 
 .hero-banner-title {
@@ -54,7 +54,7 @@
 }
 
 .hero-banner-title-accent {
-  color: #ef8d9c;
+  color: var(--color-primary);
 }
 
 .hero-banner-desc {
@@ -70,7 +70,7 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: #ef8d9c;
+  background: var(--color-primary);
   color: #fff;
   border: none;
   padding: 14px 32px;
@@ -82,12 +82,14 @@
   cursor: pointer;
   transition:
     transform 0.2s,
-    box-shadow 0.2s;
+    box-shadow 0.2s,
+    background 0.2s;
 }
 
 .hero-banner-cta:hover {
   transform: scale(1.04);
-  box-shadow: 0 8px 24px rgba(239, 141, 156, 0.35);
+  background: var(--color-primary-hover);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--color-primary) 38%, transparent);
 }
 
 .hero-banner-cta:active {
@@ -130,7 +132,7 @@
 }
 
 .hero-banner-badge-heart {
-  color: #ef8d9c;
+  color: var(--color-primary);
   line-height: 0;
 }
 
@@ -175,7 +177,7 @@
   font-family: var(--font-body);
   font-size: 13px;
   font-weight: 800;
-  color: #b8845a;
+  color: var(--color-text-secondary);
   margin: 0 0 4px;
   line-height: 1.3;
 }

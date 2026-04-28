@@ -133,7 +133,7 @@ export default function CartBagDrawer({ open, onClose }) {
           {/* Shipping progress */}
           {cartSub > 0 && toFree > 0 && (
             <div className="shipping-progress-bar" style={{ margin: 'var(--space-md) var(--space-xl)' }}>
-              <div className="shipping-progress-text">🚚 Add {formatPrice(toFree)} more for FREE shipping!</div>
+              <div className="shipping-progress-text">Add {formatPrice(toFree)} more for FREE shipping!</div>
               <div className="shipping-progress-track">
                 <div
                   className="shipping-progress-fill"
@@ -145,13 +145,13 @@ export default function CartBagDrawer({ open, onClose }) {
           {cartSub >= FREE_SHIP_AT && cartSub > 0 && (
             <div style={{
               padding: 'var(--space-md) var(--space-xl)',
-              background: '#EAFAF1',
-              borderBottom: '1px solid #D5F5E3',
+              background: 'var(--color-primary-soft)',
+              borderBottom: '1px solid var(--color-primary-light)',
               fontSize: 'var(--font-size-sm)',
               fontWeight: 700,
-              color: 'var(--color-success)',
+              color: 'var(--color-primary)',
             }}>
-              ✅ You've unlocked FREE shipping!
+              {"You've unlocked free shipping!"}
             </div>
           )}
 
@@ -220,7 +220,7 @@ export default function CartBagDrawer({ open, onClose }) {
                         disabled={busy}
                         onClick={() => remove(item)}
                         style={{ color: 'var(--color-text-muted)', fontSize: 16, padding: 'var(--space-xs)', cursor: 'pointer', background: 'none', border: 'none' }}
-                        onMouseEnter={(e) => { e.target.style.color = '#ef4444'; }}
+                        onMouseEnter={(e) => { e.target.style.color = 'var(--color-primary)'; }}
                         onMouseLeave={(e) => { e.target.style.color = 'var(--color-text-muted)'; }}
                       >
                         🗑

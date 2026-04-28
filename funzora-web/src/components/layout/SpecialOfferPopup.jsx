@@ -3,6 +3,7 @@ import { useTheme } from '@mui/material';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
+import { Gift, X } from 'lucide-react';
 
 const OFFER_KEY = 'offerPopupShown';
 const COUPON = 'FUN10';
@@ -131,9 +132,8 @@ export default function SpecialOfferPopup({ insetLeftPx = 0 }) {
   const card = (
     <div
       className={[
-        'pointer-events-auto relative w-full max-w-[300px] overflow-hidden rounded-[18px] border border-[#f5e6e0]',
-        'bg-gradient-to-b from-[#fffbf7] to-[#fff0eb]',
-        'shadow-[0_8px_28px_rgba(0,0,0,0.06)]',
+        'pointer-events-auto relative w-full max-w-[300px] overflow-hidden rounded-[18px] border border-neutral-200',
+        'bg-white shadow-[0_8px_28px_rgba(0,0,0,0.06)]',
         'transition-all duration-[420ms] ease-out',
         visible ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0',
         isDesktop ? 'w-[300px]' : '',
@@ -143,42 +143,42 @@ export default function SpecialOfferPopup({ insetLeftPx = 0 }) {
       <button
         type="button"
         onClick={dismiss}
-        className="absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full text-[#b0a8a4] transition hover:bg-white/80 hover:text-[#666]"
+        className="absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-full text-neutral-400 transition hover:bg-neutral-100 hover:text-neutral-600"
         aria-label="Close offer"
       >
-        ✕
+        <X size={18} strokeWidth={2} aria-hidden />
       </button>
 
       <div className="px-5 pb-4 pt-5">
-        <div className="mb-1 flex items-center gap-2 text-[13px] font-extrabold tracking-tight text-[#e85d5f]">
-          <span className="text-base" aria-hidden="true">🎁</span>
-          Special Offer
+        <div className="mb-1 flex items-center gap-2 text-[13px] font-extrabold tracking-tight text-[var(--color-primary)]">
+          <Gift size={18} strokeWidth={2} className="shrink-0" aria-hidden />
+          Special offer
         </div>
 
-        <p className="text-[22px] font-extrabold leading-tight tracking-tight text-[#d94a52]">
-          Get 10% OFF
+        <p className="text-[22px] font-extrabold leading-tight tracking-tight text-[var(--color-primary)]">
+          Get 10% off
         </p>
-        <p className="mt-1 text-[13px] font-semibold text-[#7a726e]">On your first order</p>
+        <p className="mt-1 text-[13px] font-semibold text-neutral-600">On your first order</p>
 
         <button
           type="button"
           onClick={onCopy}
-          className="mt-4 flex w-full flex-wrap items-center justify-center gap-x-1 rounded-xl border border-[#f5d4d0] bg-white/90 px-2 py-2.5 text-[13px] font-bold text-[#444] transition hover:border-[#f17a7e] hover:bg-white"
+          className="mt-4 flex w-full flex-wrap items-center justify-center gap-x-1 rounded-xl border border-[var(--color-primary-light)] bg-[var(--color-primary-soft)] px-2 py-2.5 text-[13px] font-bold text-neutral-700 transition hover:border-[var(--color-primary)] hover:bg-white"
         >
           <span>Use code:</span>
-          <span className="font-mono tracking-wider text-[#d94a52]">{COUPON}</span>
-          <span className="text-[11px] font-extrabold uppercase text-[#f17a7e]">Tap to copy</span>
+          <span className="font-mono tracking-wider text-[var(--color-primary)]">{COUPON}</span>
+          <span className="text-[11px] font-extrabold uppercase text-[var(--color-primary)]">Tap to copy</span>
         </button>
 
         <button
           type="button"
           onClick={onShop}
-          className="mt-3 w-full rounded-xl bg-gradient-to-r from-[#ff8a6a] to-[#f17a7e] py-3 text-[14px] font-extrabold text-white shadow-sm transition hover:brightness-[1.03] active:scale-[0.99]"
+          className="mt-3 w-full rounded-xl bg-[var(--color-primary)] py-3 text-[14px] font-extrabold text-white shadow-sm transition hover:bg-[var(--color-primary-hover)] active:scale-[0.99]"
         >
-          Shop Now →
+          Shop now →
         </button>
 
-        <p className="mt-3 text-center text-[11px] font-semibold text-[#a89e9a]">Limited time offer</p>
+        <p className="mt-3 text-center text-[11px] font-semibold text-neutral-500">Limited time offer</p>
       </div>
     </div>
   );

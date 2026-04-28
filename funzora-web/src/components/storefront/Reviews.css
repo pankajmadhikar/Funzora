@@ -1,7 +1,7 @@
 /* Parent reviews + trust ribbon — FunZora home */
 
 .reviews-container {
-  --reviews-pink: #f17a7e;
+  --reviews-pink: var(--color-primary);
   --reviews-rating-bg: #fff8f0;
   --reviews-rating-text: #ffa000;
   --reviews-quote: #ffcfd1;

@@ -61,12 +61,12 @@ select:focus,
 textarea:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.15);
+  box-shadow: 0 0 0 3px var(--color-focus-ring);
 }
 
 ::selection {
-  background: rgba(255, 107, 53, 0.2);
-  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 28%, transparent);
+  color: var(--color-text-primary);
 }
 
 #root {

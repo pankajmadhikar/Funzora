@@ -46,7 +46,8 @@
 .fz-header-logo-icon {
   width: 42px;
   height: 42px;
-  background: linear-gradient(135deg, #fde8d0, #fcd5ba);
+  background: var(--color-primary-soft);
+  border: 1px solid var(--color-primary-light);
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -66,18 +67,18 @@
 }
 
 .fz-logo-fun {
-  color: #c35a5e;
+  color: var(--color-primary);
 }
 
 .fz-logo-zora {
-  color: #79a36e;
+  color: var(--color-text-secondary);
 }
 
 .fz-header-logo-tagline {
   font-family: var(--font-body);
   font-size: 10px;
   font-weight: 700;
-  color: #79a36e;
+  color: var(--color-text-muted);
   letter-spacing: 0.8px;
   margin-top: 1px;
 }
@@ -119,7 +120,7 @@
 }
 
 .fz-header-search-btn {
-  background: #f17a7e;
+  background: var(--color-primary);
   color: #fff;
   border: none;
   padding: 10px 24px;
@@ -133,7 +134,7 @@
 }
 
 .fz-header-search-btn:hover {
-  background: #e06a6e;
+  background: var(--color-primary-hover);
 }
 
 /* Actions */
@@ -186,7 +187,7 @@
   right: -4px;
   min-width: 17px;
   height: 17px;
-  background: #f17a7e;
+  background: var(--color-primary);
   color: #fff;
   border-radius: 999px;
   font-family: var(--font-body);

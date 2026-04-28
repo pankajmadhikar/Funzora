@@ -1,8 +1,8 @@
 /* FunZora — warm retail footer */
 
 .funzora-footer {
-  --fz-footer-pink: #f17a7e;
-  --fz-footer-pink-btn: #ff767b;
+  --fz-footer-pink: var(--color-primary);
+  --fz-footer-pink-btn: var(--color-primary);
   --fz-footer-help-bg: #fff5f5;
   --fz-footer-border: #f0f0f0;
   --fz-footer-muted: #888888;
@@ -152,7 +152,7 @@
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: #7ab887;
+  color: var(--color-text-muted);
 }
 
 .funzora-brand-story > p {

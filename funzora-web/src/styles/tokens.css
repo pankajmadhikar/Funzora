@@ -1,18 +1,24 @@
 :root {
-  /* Colors */
-  --color-primary: #ff6b35;
-  --color-primary-light: #fff0eb;
+  /* ── Brand (single source of truth) ── */
+  --color-primary: #f17a7e;
+  --color-primary-hover: #e5676c;
+  --color-primary-light: #fde4e6;
+  --color-primary-soft: #fff1f2;
+
+  /* Accent (UI chrome only — prefer primary + neutrals for storefront) */
   --color-accent: #7b4fff;
   --color-accent-light: #f3efff;
+
   --color-success: #2ecc71;
   --color-warning: #f59e0b;
 
-  /* App canvas — white so storefront sections read clean on one surface */
+  /* App canvas */
   --color-bg: #ffffff;
   --color-surface: #ffffff;
   --color-border: #ebebeb;
   --color-border-strong: #d5d5d5;
 
+  /* Neutrals — text */
   --color-text-primary: #1a1a2e;
   --color-text-secondary: #555770;
   --color-text-muted: #9899a6;
@@ -44,6 +50,9 @@
   --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.07);
   --shadow-card-hover: 0 8px 28px rgba(0, 0, 0, 0.12);
   --shadow-dropdown: 0 8px 32px rgba(0, 0, 0, 0.14);
+
+  /* Focus ring (primary tint) */
+  --color-focus-ring: color-mix(in srgb, var(--color-primary) 22%, transparent);
 
   /* Typography */
   --font-display: "Fredoka One", cursive;
