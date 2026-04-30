@@ -54,9 +54,16 @@ export const apiService = {
   },
 
   // Protected endpoints
-  getProducts: async () => {
+  getProducts: async (filters = {}) => {
     try {
-      const response = await fetch(`${BASE_URL}/products`, {
+      const params = new URLSearchParams();
+      Object.entries(filters || {}).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && String(value).trim() !== "") {
+          params.set(key, value);
+        }
+      });
+      const query = params.toString() ? `?${params.toString()}` : "";
+      const response = await fetch(`${BASE_URL}/products${query}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

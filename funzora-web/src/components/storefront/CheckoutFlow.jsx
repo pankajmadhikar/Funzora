@@ -8,6 +8,7 @@ import { setCartItems } from '../../store/slices/cartSlice';
 import { formatPrice } from '../../utils/formatPrice';
 import { enrichProduct } from '../../utils/enrichProduct';
 import { FREE_SHIP_AT, SHIPPING_FLAT } from '../../config/toyStore';
+import { createWhatsAppCheckoutLink } from '../../utils/whatsappCheckout';
 
 const steps = ['Cart', 'Delivery', 'Payment', 'Confirm'];
 
@@ -45,6 +46,14 @@ export default function CheckoutFlow() {
   const cartSub = cartItems.reduce((a, i) => a + (i.productId?.price || 0) * (i.quantity || 0), 0);
   const ship = cartSub >= FREE_SHIP_AT ? 0 : SHIPPING_FLAT;
   const cartTotal = cartSub + ship;
+  const whatsappCheckoutLink = createWhatsAppCheckoutLink({
+    products: cartItems.map((item) => ({
+      name: item.productId?.name || 'Toy',
+      quantity: item.quantity || 1,
+    })),
+    giftWrap: true,
+    pincode: form.pin,
+  });
 
   const placeOrder = async () => {
     try {
@@ -155,6 +164,15 @@ export default function CheckoutFlow() {
                   >
                     Continue to delivery →
                   </button>
+                  <a
+                    href={whatsappCheckoutLink}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="btn btn--ghost btn--full btn--lg"
+                    style={{ marginTop: 'var(--space-sm)', textAlign: 'center' }}
+                  >
+                    Buy on WhatsApp
+                  </a>
                 </>
               )}
             </div>

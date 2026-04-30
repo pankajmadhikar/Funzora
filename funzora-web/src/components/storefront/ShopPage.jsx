@@ -16,6 +16,7 @@ export default function ShopPage() {
   const selCat = searchParams.get('cat') || 'all';
   const sort = searchParams.get('sort') || 'hot';
   const ageFilter = searchParams.get('age') || 'all';
+  const giftingOnly = searchParams.get('gifting') === '1';
 
   useEffect(() => {
     let cancelled = false;
@@ -41,7 +42,8 @@ export default function ShopPage() {
       const mS = !ql || p.name?.toLowerCase().includes(ql) || p.category?.toLowerCase().includes(ql) || p.description?.toLowerCase().includes(ql);
       const mC = selCat === 'all' || p._ui.displayCatId === selCat;
       const mA = ageFilter === 'all' || p._ui.age === ageFilter;
-      return mS && mC && mA;
+      const mG = !giftingOnly || p.isBestForGifting || p.productLayer === 'bundle';
+      return mS && mC && mA && mG;
     });
     list = [...list].sort((a, b) => {
       if (sort === 'low') return a.price - b.price;
@@ -51,7 +53,7 @@ export default function ShopPage() {
       return (b._ui.hot ? 1 : 0) - (a._ui.hot ? 1 : 0);
     });
     return list;
-  }, [enriched, q, selCat, sort, ageFilter]);
+  }, [enriched, q, selCat, sort, ageFilter, giftingOnly]);
 
   const setParam = (key, val) => {
     const next = new URLSearchParams(searchParams);
@@ -137,6 +139,19 @@ export default function ShopPage() {
               <MenuItem value="disc">🏷 Best discount</MenuItem>
             </Select>
           </FormControl>
+          <button
+            type="button"
+            className="btn btn--ghost"
+            onClick={() => setParam('gifting', giftingOnly ? '' : '1')}
+            style={{
+              border: giftingOnly ? '2px solid var(--color-primary)' : '2px solid var(--color-border)',
+              color: giftingOnly ? 'var(--color-primary)' : 'var(--color-text-secondary)',
+              fontWeight: 800,
+              padding: '7px 14px',
+            }}
+          >
+            Best for gifting
+          </button>
         </div>
       </div>
 

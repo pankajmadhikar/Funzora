@@ -37,8 +37,40 @@ exports.addProduct = asyncHandler(async (req, res) => {
 
 // Get all products
 exports.getAllProducts = asyncHandler(async (req, res) => {
+  const {
+    ageBucket,
+    productLayer,
+    isBestForGifting,
+    occasion,
+    interest,
+    priceBand,
+    q,
+  } = req.query;
+
+  const filters = { isDeleted: false };
+
+  if (ageBucket) filters.ageBucket = ageBucket;
+  if (productLayer) filters.productLayer = productLayer;
+  if (priceBand) filters.priceBand = priceBand;
+  if (occasion) filters.giftOccasions = occasion;
+  if (interest) filters.interests = interest;
+  if (isBestForGifting === "true" || isBestForGifting === "false") {
+    filters.isBestForGifting = isBestForGifting === "true";
+  }
+
+  if (q) {
+    const queryRegex = new RegExp(q, "i");
+    filters.$or = [
+      { name: queryRegex },
+      { description: queryRegex },
+      { category: queryRegex },
+      { subCategory: queryRegex },
+      { giftTags: queryRegex },
+    ];
+  }
+
   const products = await productModel
-    .find({ isDeleted: false })
+    .find(filters)
     .sort({ createdAt: -1 });
 
   res.status(200).json({ success: true, data: products });

@@ -11,6 +11,7 @@ import { formatPrice } from '../../utils/formatPrice';
 import { toggleWishlist, isInWishlist } from '../../utils/wishlistStorage';
 import ToyProductCard from '../storefront/ToyProductCard';
 import './ProductDetails.css';
+import { createWhatsAppCheckoutLink } from '../../utils/whatsappCheckout';
 
 function ProductDetails() {
   const { id } = useParams();
@@ -107,6 +108,10 @@ function ProductDetails() {
   const d = discPct(product.price, product.mrp);
   const stock = u.stock;
   const images = product.images?.length ? product.images : [];
+  const waLink = createWhatsAppCheckoutLink({
+    products: [{ name: product.name, quantity }],
+    giftWrap: !!(product.isBestForGifting || product.productLayer === 'bundle'),
+  });
 
   const prevImg = () => setSelectedImage((i) => (i - 1 + images.length) % images.length);
   const nextImg = () => setSelectedImage((i) => (i + 1) % images.length);
@@ -180,6 +185,9 @@ function ProductDetails() {
           <div className="pd-attr-row">
             <span className="pd-attr pd-attr--age">👶 Age {u.age}</span>
             <span className="pd-attr pd-attr--stock">✅ In stock</span>
+            {(product.isBestForGifting || product.productLayer === 'bundle') && (
+              <span className="pd-attr">🎁 Best for gifting</span>
+            )}
           </div>
 
           <p className="pd-desc">{product.description}</p>
@@ -212,6 +220,9 @@ function ProductDetails() {
               </div>
 
               <div className="pd-btn-group">
+                <a className="pd-btn-add" href={waLink} target="_blank" rel="noreferrer">
+                  💬 Buy on WhatsApp
+                </a>
                 <button
                   className="pd-btn-add"
                   onClick={handleAddToCart}

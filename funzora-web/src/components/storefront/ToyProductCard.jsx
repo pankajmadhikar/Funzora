@@ -10,6 +10,7 @@ import { formatPrice } from '../../utils/formatPrice';
 import { enrichProduct, discPct } from '../../utils/enrichProduct';
 import { toggleWishlist, isInWishlist } from '../../utils/wishlistStorage';
 import { ICON_STROKE, ICON_SIZES } from '../../constants/appIconTokens';
+import { createWhatsAppCheckoutLink } from '../../utils/whatsappCheckout';
 
 const fontCard = "font-['Inter',var(--font-body),sans-serif]";
 
@@ -101,6 +102,10 @@ export default function ToyProductCard({ product: raw, compact = false }) {
 
   const primaryCls = 'text-[var(--color-primary)]';
   const primaryBg = 'bg-[var(--color-primary)]';
+  const waLink = createWhatsAppCheckoutLink({
+    products: [{ name: product.name, quantity: 1 }],
+    giftWrap: !!(product.isBestForGifting || product.productLayer === 'bundle'),
+  });
 
   return (
     <div
@@ -176,6 +181,14 @@ export default function ToyProductCard({ product: raw, compact = false }) {
           <span className="shrink-0">Age {u.age}</span>
         </div>
 
+        {(product.isBestForGifting || product.productLayer === 'bundle') && (
+          <div style={{ marginTop: 6 }}>
+            <span className="rounded-full bg-[var(--color-primary-soft)] px-2 py-1 text-[10px] font-semibold text-[var(--color-primary)]">
+              Best for gifting
+            </span>
+          </div>
+        )}
+
         <div className="mt-2 flex flex-wrap items-baseline gap-2">
           <span className={`text-lg ${primaryCls} text-sm font-medium`}>{formatPrice(product.price)}</span>
           {product.mrp > product.price && (
@@ -184,6 +197,14 @@ export default function ToyProductCard({ product: raw, compact = false }) {
         </div>
 
         <div className="mt-3 flex flex-1 flex-col justify-end" onClick={(e) => e.stopPropagation()}>
+          <a
+            href={waLink}
+            target="_blank"
+            rel="noreferrer"
+            className="mb-2 w-full rounded-xl border border-[var(--color-primary)] px-4 py-2 text-center text-sm font-semibold text-[var(--color-primary)] transition-colors hover:bg-[var(--color-primary-soft)]"
+          >
+            Buy on WhatsApp
+          </a>
           {!inCart ? (
             <button
               type="button"

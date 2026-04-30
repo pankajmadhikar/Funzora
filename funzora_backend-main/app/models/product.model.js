@@ -10,6 +10,11 @@ const SHOP_CATEGORY_IDS = [
   "learning",
 ];
 
+const AGE_BUCKETS = ["0-2", "3-5", "6-8", "9-12", "13+"];
+const PRODUCT_LAYERS = ["hero", "fast", "bundle"];
+const GIFT_OCCASIONS = ["birthday", "festival", "return-gift", "everyday"];
+const PRICE_BANDS = ["under-499", "500-999", "1000-1999", "2000+"];
+
 const ProductSchema = new mongoose.Schema(
   {
     category: { type: String, required: false },
@@ -43,6 +48,34 @@ const ProductSchema = new mongoose.Schema(
         },
         message: "shopCategoryId must be one of: " + SHOP_CATEGORY_IDS.join(", ") + ", or empty",
       },
+    },
+    ageBucket: {
+      type: String,
+      default: "",
+      enum: ["", ...AGE_BUCKETS],
+    },
+    productLayer: {
+      type: String,
+      default: "",
+      enum: ["", ...PRODUCT_LAYERS],
+    },
+    giftTags: [{ type: String }],
+    giftOccasions: {
+      type: [String],
+      default: [],
+      validate: {
+        validator(v) {
+          return Array.isArray(v) && v.every((item) => GIFT_OCCASIONS.includes(item));
+        },
+        message: "giftOccasions has invalid values",
+      },
+    },
+    interests: [{ type: String }],
+    isBestForGifting: { type: Boolean, default: false },
+    priceBand: {
+      type: String,
+      default: "",
+      enum: ["", ...PRICE_BANDS],
     },
   },
   { timestamps: true }

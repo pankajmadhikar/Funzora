@@ -24,6 +24,7 @@ import ShopPage from './components/storefront/ShopPage';
 import CheckoutFlow from './components/storefront/CheckoutFlow';
 import OrderSuccessPage from './components/storefront/OrderSuccessPage';
 import WishlistPage from './components/storefront/WishlistPage';
+import GiftFinderPage from './components/storefront/GiftFinderPage';
 import AppSidebar, { getSidebarWidthPx } from './components/layout/AppSidebar';
 import AppTopBar from './components/layout/AppTopBar';
 import AccountUserMenu from './components/layout/AccountUserMenu';
@@ -115,6 +116,7 @@ function AppShell() {
               <Route path="/checkout" element={<CheckoutFlow />} />
               <Route path="/order-success" element={<OrderSuccessPage />} />
               <Route path="/wishlist" element={<WishlistPage />} />
+              <Route path="/gift-finder" element={<GiftFinderPage />} />
             </Route>
 
             <Route element={<ProtectedRoute requiredRole="admin" />}>

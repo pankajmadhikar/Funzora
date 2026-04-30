@@ -48,6 +48,28 @@ export default function StorefrontHome() {
       <HeroSection />
 
       <div className="bb-page">
+        <div className="bb-section" style={{ paddingBottom: 'var(--space-lg)' }}>
+          <div className="section-header">
+            <div>
+              <h2 className="section-title">Shop by age</h2>
+              <p style={{ color: 'var(--color-text-muted)', fontWeight: 600 }}>Decide faster with age-first picks.</p>
+            </div>
+            <Link to="/gift-finder" className="btn btn--primary btn--sm">Gift finder →</Link>
+          </div>
+          <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
+            {['0-2', '3-5', '6-8', '9-12', '13+'].map((age) => (
+              <button
+                key={age}
+                type="button"
+                className="btn btn--ghost"
+                onClick={() => navigate(`/shop?age=${encodeURIComponent(age)}`)}
+              >
+                {age} years
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* ── Hot & new ── */}
         <div className="bb-section">
           <div className="section-header">
@@ -98,6 +120,24 @@ export default function StorefrontHome() {
             </div>
           </div>
         )}
+
+        <div className="bb-section">
+          <div className="section-header">
+            <div>
+              <h2 className="section-title">Best for gifting</h2>
+              <p style={{ color: 'var(--color-text-muted)', fontWeight: 600 }}>Bundle-ready picks parents can trust.</p>
+            </div>
+            <button className="btn btn--ghost btn--sm" onClick={() => navigate('/shop?gifting=1')}>
+              View all →
+            </button>
+          </div>
+          <div className="bb-grid bb-grid-4">
+            {enriched
+              .filter((p) => p.isBestForGifting || p.productLayer === 'bundle')
+              .slice(0, 4)
+              .map((p) => <ToyProductCard key={p._id} product={p} />)}
+          </div>
+        </div>
 
         {/* ── Parent reviews (footer trust ribbon follows in App shell) ── */}
         <div className="bb-section bb-section--before-footer">
