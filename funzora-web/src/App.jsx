@@ -59,7 +59,8 @@ function AppShell() {
   const userRole = isValidUser ? user.role || 'user' : 'user';
 
   const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
-  const showChrome = isAuthenticated && isValidUser && !isAuthPage;
+  // const showChrome = isAuthenticated && isValidUser && !isAuthPage;
+  const showChrome = true;
 
   return (
     <Box className="bb-root" sx={{ minHeight: '100vh', bgcolor: 'var(--color-bg)' }}>
@@ -67,7 +68,7 @@ function AppShell() {
         <AppSidebar
           open={sideOpen}
           onClose={() => setSideOpen(false)}
-          role={userRole}
+          role={"admin"|| 'user' }
           expanded={sidebarExpanded}
           onToggleExpanded={toggleSidebar}
           onAccountMenuOpen={(e) => setAccountMenu({ anchorEl: e.currentTarget, source: 'sidebar' })}
@@ -103,20 +104,20 @@ function AppShell() {
         {/* No flex-grow: avoids a tall empty band inside main above the footer */}
         <Box component="main" sx={{ flex: '0 1 auto', width: '100%' }}>
           <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-
-            <Route element={<ProtectedRoute requiredRole="user" />}>
+            {/* <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} /> */}
               <Route path="/" element={<Home />} />
               <Route path="/shop" element={<ShopPage />} />
               <Route path="/product/:id" element={<ProductDetails />} />
-              <Route path="/profile" element={<Profile />} />
               <Route path="/categories" element={<Categories />} />
+              <Route path="/gift-finder" element={<GiftFinderPage />} />
+
+            <Route element={<ProtectedRoute requiredRole="user" />}>
+              <Route path="/profile" element={<Profile />} />
               <Route path="/cart" element={<Cart />} />
               <Route path="/checkout" element={<CheckoutFlow />} />
               <Route path="/order-success" element={<OrderSuccessPage />} />
               <Route path="/wishlist" element={<WishlistPage />} />
-              <Route path="/gift-finder" element={<GiftFinderPage />} />
             </Route>
 
             <Route element={<ProtectedRoute requiredRole="admin" />}>
