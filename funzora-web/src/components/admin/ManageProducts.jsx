@@ -22,6 +22,12 @@ import {
   CircularProgress,
   Grid,
   InputAdornment,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  Checkbox,
+  FormControlLabel,
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -33,6 +39,11 @@ import ManageDiscounts from './ManageDiscounts';
 import { toast } from 'react-hot-toast';
 
 const ManageProducts = () => {
+  const AGE_BUCKET_OPTIONS = ['0-2', '3-5', '6-8', '9-12', '13+'];
+  const PRODUCT_LAYER_OPTIONS = ['hero', 'fast', 'bundle'];
+  const GIFT_OCCASION_OPTIONS = ['birthday', 'festival', 'return-gift', 'everyday'];
+  const PRICE_BAND_OPTIONS = ['under-499', '500-999', '1000-1999', '2000+'];
+
   const [products, setProducts] = useState([]);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [editProduct, setEditProduct] = useState(null);
@@ -65,7 +76,12 @@ const ManageProducts = () => {
 
   const handleEdit = (product) => {
     setSelectedProduct(product);
-    setEditProduct(product);
+    setEditProduct({
+      ...product,
+      giftTagsText: Array.isArray(product.giftTags) ? product.giftTags.join(', ') : '',
+      interestsText: Array.isArray(product.interests) ? product.interests.join(', ') : '',
+      giftOccasions: Array.isArray(product.giftOccasions) ? product.giftOccasions : [],
+    });
     setOpenDialog(true);
   };
 
@@ -102,7 +118,21 @@ const ManageProducts = () => {
         price: Number(editProduct.price),
         mrp: Number(editProduct.mrp),
         discountPercentage: Number(editProduct.discountPercentage),
-        quantity: Number(editProduct.quantity)
+        quantity: Number(editProduct.quantity),
+        ageLabel: editProduct.ageLabel || '',
+        ageBucket: editProduct.ageBucket || '',
+        productLayer: editProduct.productLayer || '',
+        isBestForGifting: Boolean(editProduct.isBestForGifting),
+        priceBand: editProduct.priceBand || '',
+        giftOccasions: Array.isArray(editProduct.giftOccasions) ? editProduct.giftOccasions : [],
+        giftTags: String(editProduct.giftTagsText || '')
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
+        interests: String(editProduct.interestsText || '')
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean),
       };
 
       await apiService.updateProduct(editProduct._id, updatedData);
@@ -218,6 +248,130 @@ const ManageProducts = () => {
                     value={editProduct?.subCategory || ''}
                     onChange={(e) => setEditProduct({ ...editProduct, subCategory: e.target.value })}
                     required
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Age label"
+                    fullWidth
+                    value={editProduct?.ageLabel || ''}
+                    onChange={(e) => setEditProduct({ ...editProduct, ageLabel: e.target.value })}
+                    placeholder="e.g. 2-6 years / 3+"
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id="age-bucket-edit">Age bucket</InputLabel>
+                    <Select
+                      labelId="age-bucket-edit"
+                      label="Age bucket"
+                      value={editProduct?.ageBucket || ''}
+                      onChange={(e) => setEditProduct({ ...editProduct, ageBucket: e.target.value })}
+                    >
+                      <MenuItem value="">
+                        <em>Not set</em>
+                      </MenuItem>
+                      {AGE_BUCKET_OPTIONS.map((opt) => (
+                        <MenuItem key={opt} value={opt}>
+                          {opt}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id="product-layer-edit">Product layer</InputLabel>
+                    <Select
+                      labelId="product-layer-edit"
+                      label="Product layer"
+                      value={editProduct?.productLayer || ''}
+                      onChange={(e) => setEditProduct({ ...editProduct, productLayer: e.target.value })}
+                    >
+                      <MenuItem value="">
+                        <em>Not set</em>
+                      </MenuItem>
+                      {PRODUCT_LAYER_OPTIONS.map((opt) => (
+                        <MenuItem key={opt} value={opt}>
+                          {opt}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id="price-band-edit">Price band</InputLabel>
+                    <Select
+                      labelId="price-band-edit"
+                      label="Price band"
+                      value={editProduct?.priceBand || ''}
+                      onChange={(e) => setEditProduct({ ...editProduct, priceBand: e.target.value })}
+                    >
+                      <MenuItem value="">
+                        <em>Not set</em>
+                      </MenuItem>
+                      {PRICE_BAND_OPTIONS.map((opt) => (
+                        <MenuItem key={opt} value={opt}>
+                          {opt}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id="gift-occasions-edit">Gift occasions</InputLabel>
+                    <Select
+                      labelId="gift-occasions-edit"
+                      label="Gift occasions"
+                      multiple
+                      value={editProduct?.giftOccasions || []}
+                      onChange={(e) => setEditProduct({ ...editProduct, giftOccasions: e.target.value })}
+                    >
+                      {GIFT_OCCASION_OPTIONS.map((opt) => (
+                        <MenuItem key={opt} value={opt}>
+                          {opt}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Gift tags (comma separated)"
+                    fullWidth
+                    value={editProduct?.giftTagsText || ''}
+                    onChange={(e) => setEditProduct({ ...editProduct, giftTagsText: e.target.value })}
+                    placeholder="Best for gifting, Parent-trusted"
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    label="Interests (comma separated)"
+                    fullWidth
+                    value={editProduct?.interestsText || ''}
+                    onChange={(e) => setEditProduct({ ...editProduct, interestsText: e.target.value })}
+                    placeholder="stem, sensory, art"
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={Boolean(editProduct?.isBestForGifting)}
+                        onChange={(e) => setEditProduct({ ...editProduct, isBestForGifting: e.target.checked })}
+                      />
+                    }
+                    label="Best for gifting"
                   />
                 </Grid>
 

@@ -26,6 +26,75 @@ function extractAgeFromText(text) {
   return m ? `${m[1]}+` : null;
 }
 
+/** Inclusive numeric ranges for shop-by-age buckets (years). */
+const AGE_BUCKET_RANGES = {
+  '0-2': [0, 2],
+  '3-5': [3, 5],
+  '6-8': [6, 8],
+  '9-12': [9, 12],
+  '13+': [13, 120],
+};
+
+function rangesOverlap(a, b) {
+  return a[0] <= b[1] && b[0] <= a[1];
+}
+
+/**
+ * Parse a min–max age range (years) from free text (ageLabel, description, etc.).
+ */
+export function parseAgeRangeYearsFromText(text) {
+  if (!text) return null;
+  const s = String(text);
+  const hyphen = s.match(/(\d+)\s*[-–]\s*(\d+)/);
+  if (hyphen) {
+    const lo = Number(hyphen[1]);
+    const hi = Number(hyphen[2]);
+    if (Number.isFinite(lo) && Number.isFinite(hi)) {
+      return [Math.min(lo, hi), Math.max(lo, hi)];
+    }
+  }
+  const plus = s.match(/(\d+)\s*\+\s*(?:years?)?/i) || s.match(/age\s*(\d+)\s*\+/i);
+  if (plus) {
+    const lo = Number(plus[1]);
+    if (Number.isFinite(lo)) return [lo, 18];
+  }
+  return null;
+}
+
+/**
+ * Numeric age range for a product: prefers backend `ageBucket`, else parses label fields.
+ */
+export function getProductAgeRangeYears(p) {
+  if (!p) return [0, 18];
+  if (p.ageBucket && AGE_BUCKET_RANGES[p.ageBucket]) {
+    return AGE_BUCKET_RANGES[p.ageBucket];
+  }
+  const sources = [p.ageLabel, p.subCategory, p.description, p.name];
+  for (const src of sources) {
+    const r = parseAgeRangeYearsFromText(src);
+    if (r) return r;
+  }
+  const fromUi = parseAgeRangeYearsFromText(p._ui?.age);
+  if (fromUi) return fromUi;
+  return [0, 18];
+}
+
+/**
+ * Shop age query: `all`, bucket ids (`3-5`), or legacy `3+` (min age on label).
+ */
+export function matchesShopAgeFilter(p, ageFilter) {
+  if (!ageFilter || ageFilter === 'all') return true;
+  const pr = getProductAgeRangeYears(p);
+  const bucket = AGE_BUCKET_RANGES[ageFilter];
+  if (bucket) return rangesOverlap(pr, bucket);
+  const legacy = String(ageFilter).match(/^(\d+)\+$/);
+  if (legacy) {
+    const n = Number(legacy[1]);
+    if (Number.isFinite(n)) return pr[0] <= n && n <= pr[1];
+  }
+  return (p._ui?.age || '') === ageFilter;
+}
+
 function parseFeatures(p) {
   if (Array.isArray(p.features) && p.features.length) return p.features.slice(0, 8);
   if (p.specification) {
@@ -62,6 +131,7 @@ export function enrichProduct(p) {
     extractAgeFromText(p.description) ||
     extractAgeFromText(p.name) ||
     '3+';
+  const ageBucket = p.ageBucket && AGE_BUCKET_RANGES[p.ageBucket] ? p.ageBucket : '';
   const emoji = p.displayEmoji || meta.icon;
   const rating = p.rating != null ? Number(p.rating) : 4.5;
   const rev = p.reviewCount != null ? Number(p.reviewCount) : 0;
@@ -79,6 +149,7 @@ export function enrichProduct(p) {
       hot,
       isNew,
       age,
+      ageBucket,
       rating,
       rev,
       feat,

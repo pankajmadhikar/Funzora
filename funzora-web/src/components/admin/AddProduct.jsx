@@ -28,6 +28,10 @@ import { toast } from 'react-hot-toast';
 import { TOY_CATS } from '../../config/toyStore';
 
 const SHOP_CATEGORY_OPTIONS = TOY_CATS.filter((c) => c.id !== 'all');
+const AGE_BUCKET_OPTIONS = ['0-2', '3-5', '6-8', '9-12', '13+'];
+const PRODUCT_LAYER_OPTIONS = ['hero', 'fast', 'bundle'];
+const GIFT_OCCASION_OPTIONS = ['birthday', 'festival', 'return-gift', 'everyday'];
+const PRICE_BAND_OPTIONS = ['under-499', '500-999', '1000-1999', '2000+'];
 
 const emptyProduct = {
   name: '',
@@ -48,6 +52,13 @@ const emptyProduct = {
   reviewCount: 0,
   featuresText: '',
   shopCategoryId: '',
+  ageBucket: '',
+  productLayer: '',
+  giftTagsText: '',
+  giftOccasions: [],
+  interestsText: '',
+  isBestForGifting: false,
+  priceBand: '',
 };
 
 const AddProduct = () => {
@@ -235,6 +246,34 @@ const AddProduct = () => {
       payload.shopCategoryId = shopId;
     }
 
+    const ageBucket = String(product.ageBucket || '').trim();
+    if (ageBucket && AGE_BUCKET_OPTIONS.includes(ageBucket)) payload.ageBucket = ageBucket;
+
+    const productLayer = String(product.productLayer || '').trim();
+    if (productLayer && PRODUCT_LAYER_OPTIONS.includes(productLayer)) payload.productLayer = productLayer;
+
+    const giftTags = String(product.giftTagsText || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (giftTags.length) payload.giftTags = giftTags;
+
+    const giftOccasions = Array.isArray(product.giftOccasions)
+      ? product.giftOccasions.filter((item) => GIFT_OCCASION_OPTIONS.includes(item))
+      : [];
+    if (giftOccasions.length) payload.giftOccasions = giftOccasions;
+
+    const interests = String(product.interestsText || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (interests.length) payload.interests = interests;
+
+    payload.isBestForGifting = Boolean(product.isBestForGifting);
+
+    const priceBand = String(product.priceBand || '').trim();
+    if (priceBand && PRICE_BAND_OPTIONS.includes(priceBand)) payload.priceBand = priceBand;
+
     return payload;
   };
 
@@ -368,6 +407,139 @@ const AddProduct = () => {
                       ))}
                     </Select>
                   </FormControl>
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id={`age-bucket-${productIndex}`}>Age bucket (finder)</InputLabel>
+                    <Select
+                      labelId={`age-bucket-${productIndex}`}
+                      label="Age bucket (finder)"
+                      value={product.ageBucket || ''}
+                      onChange={(e) =>
+                        handleInputChange(productIndex, {
+                          target: { name: 'ageBucket', value: e.target.value },
+                        })
+                      }
+                    >
+                      <MenuItem value="">
+                        <em>Not set</em>
+                      </MenuItem>
+                      {AGE_BUCKET_OPTIONS.map((opt) => (
+                        <MenuItem key={opt} value={opt}>
+                          {opt}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id={`product-layer-${productIndex}`}>Product layer</InputLabel>
+                    <Select
+                      labelId={`product-layer-${productIndex}`}
+                      label="Product layer"
+                      value={product.productLayer || ''}
+                      onChange={(e) =>
+                        handleInputChange(productIndex, {
+                          target: { name: 'productLayer', value: e.target.value },
+                        })
+                      }
+                    >
+                      <MenuItem value="">
+                        <em>Not set</em>
+                      </MenuItem>
+                      {PRODUCT_LAYER_OPTIONS.map((opt) => (
+                        <MenuItem key={opt} value={opt}>
+                          {opt}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id={`price-band-${productIndex}`}>Price band (finder)</InputLabel>
+                    <Select
+                      labelId={`price-band-${productIndex}`}
+                      label="Price band (finder)"
+                      value={product.priceBand || ''}
+                      onChange={(e) =>
+                        handleInputChange(productIndex, {
+                          target: { name: 'priceBand', value: e.target.value },
+                        })
+                      }
+                    >
+                      <MenuItem value="">
+                        <em>Not set</em>
+                      </MenuItem>
+                      {PRICE_BAND_OPTIONS.map((opt) => (
+                        <MenuItem key={opt} value={opt}>
+                          {opt}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel id={`gift-occasions-${productIndex}`}>Gift occasions</InputLabel>
+                    <Select
+                      labelId={`gift-occasions-${productIndex}`}
+                      label="Gift occasions"
+                      multiple
+                      value={product.giftOccasions || []}
+                      onChange={(e) =>
+                        handleInputChange(productIndex, {
+                          target: { name: 'giftOccasions', value: e.target.value },
+                        })
+                      }
+                    >
+                      {GIFT_OCCASION_OPTIONS.map((opt) => (
+                        <MenuItem key={opt} value={opt}>
+                          {opt}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Gift tags (comma separated)"
+                    name="giftTagsText"
+                    value={product.giftTagsText}
+                    onChange={(e) => handleInputChange(productIndex, e)}
+                    placeholder="Best for gifting, Parent-trusted"
+                  />
+                </Grid>
+
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Interests (comma separated)"
+                    name="interestsText"
+                    value={product.interestsText}
+                    onChange={(e) => handleInputChange(productIndex, e)}
+                    placeholder="stem, sensory, art"
+                  />
+                </Grid>
+
+                <Grid item xs={12}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="isBestForGifting"
+                        checked={Boolean(product.isBestForGifting)}
+                        onChange={(e) => handleInputChange(productIndex, e)}
+                      />
+                    }
+                    label="Best for gifting (shows in gifting filters)"
+                  />
                 </Grid>
 
                 <Grid item xs={12} sm={6}>

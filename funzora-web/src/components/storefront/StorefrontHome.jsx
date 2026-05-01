@@ -8,6 +8,7 @@ import { enrichProducts } from '../../utils/enrichProduct';
 import ToyProductCard from './ToyProductCard';
 import HeroSection from './HeroSection';
 import ReviewSection from './ReviewSection';
+import { AGE_BUCKETS } from '../../config/gifting';
 
 export default function StorefrontHome() {
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ export default function StorefrontHome() {
             <Link to="/gift-finder" className="btn btn--primary btn--sm">Gift finder →</Link>
           </div>
           <div style={{ display: 'flex', gap: 'var(--space-sm)', flexWrap: 'wrap' }}>
-            {['0-2', '3-5', '6-8', '9-12', '13+'].map((age) => (
+            {AGE_BUCKETS.map((age) => (
               <button
                 key={age}
                 type="button"

@@ -2,8 +2,9 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { CircularProgress, MenuItem, Select, FormControl } from '@mui/material';
 import { useSearchParams, Link } from 'react-router-dom';
 import { apiService } from '../../services/apiService';
-import { enrichProducts } from '../../utils/enrichProduct';
+import { enrichProducts, matchesShopAgeFilter } from '../../utils/enrichProduct';
 import { TOY_CATS } from '../../config/toyStore';
+import { AGE_BUCKETS } from '../../config/gifting';
 import ToyProductCard from './ToyProductCard';
 
 export default function ShopPage() {
@@ -41,7 +42,7 @@ export default function ShopPage() {
     let list = enriched.filter((p) => {
       const mS = !ql || p.name?.toLowerCase().includes(ql) || p.category?.toLowerCase().includes(ql) || p.description?.toLowerCase().includes(ql);
       const mC = selCat === 'all' || p._ui.displayCatId === selCat;
-      const mA = ageFilter === 'all' || p._ui.age === ageFilter;
+      const mA = matchesShopAgeFilter(p, ageFilter);
       const mG = !giftingOnly || p.isBestForGifting || p.productLayer === 'bundle';
       return mS && mC && mA && mG;
     });
@@ -115,8 +116,15 @@ export default function ShopPage() {
               }}
             >
               <MenuItem value="all">All ages</MenuItem>
+              {AGE_BUCKETS.map((id) => (
+                <MenuItem key={id} value={id}>
+                  {id === '13+' ? '13+ years' : `${id.replace('-', '–')} years`}
+                </MenuItem>
+              ))}
               {['1+', '2+', '3+', '4+', '5+', '6+', '7+'].map((a) => (
-                <MenuItem key={a} value={a}>{a} years</MenuItem>
+                <MenuItem key={a} value={a} sx={{ fontSize: '0.85rem', color: 'text.secondary' }}>
+                  {a} (legacy)
+                </MenuItem>
               ))}
             </Select>
           </FormControl>
