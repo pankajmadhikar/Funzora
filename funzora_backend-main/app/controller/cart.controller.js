@@ -2,25 +2,35 @@ const Cart = require("../models/cart.model");
 const Order = require("../models/order.model");
 const Product = require("../models/product.model");
 const asyncHandler = require("../middlewares/async");
+const { normalizeIndianPhone } = require("../utils/phone");
+
+function requirePhone(body, query = {}) {
+  return normalizeIndianPhone(body?.phone ?? query.phone);
+}
 
 // Add to Cart
 exports.addToCart = asyncHandler(async (req, res) => {
+  const phone = requirePhone(req.body);
   const { productId, quantity } = req.body;
 
-  // Validate input
-  if (!quantity || quantity < 1) {
-    return res
-      .status(400)
-      .json({ success: false, message: "Quantity must be at least 1" });
+  if (!phone) {
+    return res.status(400).json({
+      success: false,
+      message: "Valid 10-digit phone is required",
+    });
   }
 
-  // Fetch the product to check availability
+  if (!quantity || quantity < 1) {
+    return res.status(400).json({
+      success: false,
+      message: "Quantity must be at least 1",
+    });
+  }
+
   const product = await Product.findById(productId);
 
   if (!product) {
-    return res
-      .status(404)
-      .json({ success: false, message: "Product not found" });
+    return res.status(404).json({ success: false, message: "Product not found" });
   }
 
   if (quantity > product.availableQuantity) {
@@ -30,17 +40,14 @@ exports.addToCart = asyncHandler(async (req, res) => {
     });
   }
 
-  // Fetch the user's cart
-  let cart = await Cart.findOne({ userId: req.user.id });
+  let cart = await Cart.findOne({ phone });
 
   if (cart) {
-    // Find the product in the cart
     const itemIndex = cart.items.findIndex(
       (item) => item.productId.toString() === productId
     );
 
     if (itemIndex > -1) {
-      // Check if the new quantity exceeds availableQuantity
       const newQuantity = cart.items[itemIndex].quantity + quantity;
 
       if (newQuantity > product.availableQuantity) {
@@ -52,16 +59,13 @@ exports.addToCart = asyncHandler(async (req, res) => {
         });
       }
 
-      // Update the quantity in the cart
       cart.items[itemIndex].quantity = newQuantity;
     } else {
-      // Add new item to the cart
       cart.items.push({ productId, quantity });
     }
   } else {
-    // Create a new cart if none exists
-    cart = new Cart({
-      userId: req.user.id,
+    cart = await Cart.create({
+      phone,
       items: [{ productId, quantity }],
     });
   }
@@ -70,22 +74,40 @@ exports.addToCart = asyncHandler(async (req, res) => {
   res.status(200).json({ success: true, data: cart });
 });
 
-// View Cart
 exports.viewCart = asyncHandler(async (req, res) => {
-  const cart = await Cart.findOne({ userId: req.user.id }).populate(
+  const phone = requirePhone(req.body, req.query);
+
+  if (!phone) {
+    return res.status(400).json({
+      success: false,
+      message: "phone query or body required (10-digit Indian mobile)",
+    });
+  }
+
+  const cart = await Cart.findOne({ phone }).populate(
     "items.productId",
   );
 
-  if (!cart) {
-    return res.status(404).json({ success: false, message: "Cart is empty" });
+  if (!cart || cart.items.length === 0) {
+    return res.status(200).json({
+      success: true,
+      data: { phone, items: [], _empty: true },
+    });
   }
 
   res.status(200).json({ success: true, data: cart });
 });
 
-// Checkout Cart
 exports.checkoutCart = asyncHandler(async (req, res) => {
-  const cart = await Cart.findOne({ userId: req.user.id }).populate(
+  const phone = requirePhone(req.body, req.query);
+  if (!phone) {
+    return res.status(400).json({
+      success: false,
+      message: "phone is required for checkout",
+    });
+  }
+
+  const cart = await Cart.findOne({ phone }).populate(
     "items.productId",
     "name price"
   );
@@ -98,29 +120,37 @@ exports.checkoutCart = asyncHandler(async (req, res) => {
   }
 
   const totalAmount = cart.items.reduce(
-    (total, item) => total + item.productId.price * item.quantity,
+    (total, item) =>
+      total + (item.productId?.price ?? 0) * (item.quantity || 0),
     0
   );
 
-  const order = new Order({
-    userId: req.user.id,
-    products: cart.items,
+  const order = await Order.create({
+    customerPhone: phone,
+    products: cart.items.map((item) => ({
+      productId: item.productId?._id || item.productId,
+      quantity: item.quantity,
+    })),
     totalAmount,
   });
 
-  await order.save();
-
-  await Cart.findOneAndDelete({ userId: req.user.id });
+  await Cart.findOneAndDelete({ phone });
 
   res.status(201).json({ success: true, data: order });
 });
 
-// Update Cart Item Quantity
 exports.updateCartItemQuantity = asyncHandler(async (req, res) => {
+  const phone = requirePhone(req.body, req.query);
   const { productId } = req.params;
   const { action } = req.body;
 
-  // Validate action
+  if (!phone) {
+    return res.status(400).json({
+      success: false,
+      message: "phone is required",
+    });
+  }
+
   if (!["increase", "decrease"].includes(action)) {
     return res.status(400).json({
       success: false,
@@ -128,34 +158,29 @@ exports.updateCartItemQuantity = asyncHandler(async (req, res) => {
     });
   }
 
-  // Fetch the product to check availability
   const product = await Product.findById(productId);
   if (!product) {
-    return res
-      .status(404)
-      .json({ success: false, message: "Product not found" });
+    return res.status(404).json({ success: false, message: "Product not found" });
   }
 
-  // Fetch the user's cart
-  const cart = await Cart.findOne({ userId: req.user.id });
+  const cart = await Cart.findOne({ phone });
   if (!cart) {
     return res.status(404).json({ success: false, message: "Cart not found" });
   }
 
-  // Find the product in the cart
   const itemIndex = cart.items.findIndex(
     (item) => item.productId.toString() === productId
   );
 
   if (itemIndex === -1) {
-    return res
-      .status(404)
-      .json({ success: false, message: "Product not found in cart" });
+    return res.status(404).json({
+      success: false,
+      message: "Product not found in cart",
+    });
   }
 
   const cartItem = cart.items[itemIndex];
 
-  // Update quantity based on action
   if (action === "increase") {
     if (cartItem.quantity + 1 > product.availableQuantity) {
       return res.status(400).json({
@@ -166,24 +191,37 @@ exports.updateCartItemQuantity = asyncHandler(async (req, res) => {
     cartItem.quantity += 1;
   } else if (action === "decrease") {
     if (cartItem.quantity - 1 < 1) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Quantity cannot be less than 1" });
+      cart.items.splice(itemIndex, 1);
+    } else {
+      cartItem.quantity -= 1;
     }
-    cartItem.quantity -= 1;
   }
 
-  // Save the updated cart
-  await cart.save();
+  if (cart.items.length === 0) {
+    await Cart.findOneAndDelete({ phone });
+    return res.status(200).json({
+      success: true,
+      message: "Cart is now empty",
+      data: { phone, items: [] },
+    });
+  }
 
+  await cart.save();
   res.status(200).json({ success: true, data: cart });
 });
 
-
 exports.removeCartItem = asyncHandler(async (req, res) => {
+  const phone = requirePhone(req.body, req.query);
   const { productId } = req.params;
 
-  const cart = await Cart.findOne({ userId: req.user.id });
+  if (!phone) {
+    return res.status(400).json({
+      success: false,
+      message: "phone is required",
+    });
+  }
+
+  const cart = await Cart.findOne({ phone });
   if (!cart) {
     return res.status(404).json({ success: false, message: "Cart not found" });
   }
@@ -193,17 +231,28 @@ exports.removeCartItem = asyncHandler(async (req, res) => {
   );
 
   if (itemIndex === -1) {
-    return res.status(404).json({ success: false, message: "Product not found in cart" });
+    return res.status(404).json({
+      success: false,
+      message: "Product not found in cart",
+    });
   }
 
   cart.items.splice(itemIndex, 1);
 
   if (cart.items.length === 0) {
-    await Cart.findOneAndDelete({ userId: req.user.id });
-    return res.status(200).json({ success: true, message: "Cart is now empty" });
+    await Cart.findOneAndDelete({ phone });
+    return res.status(200).json({
+      success: true,
+      message: "Cart is now empty",
+      data: { phone, items: [] },
+    });
   }
 
   await cart.save();
 
-  res.status(200).json({ success: true, message: "Item removed from cart", data: cart });
+  res.status(200).json({
+    success: true,
+    message: "Item removed from cart",
+    data: cart,
+  });
 });

@@ -5,6 +5,7 @@ import { useDispatch } from 'react-redux';
 import { toast } from 'react-hot-toast';
 import { apiService } from '../../services/apiService';
 import { setCartItems } from '../../store/slices/cartSlice';
+import { useGuestPhone, normalizeStoredPhone } from '../../contexts/GuestPhoneContext';
 import { formatPrice } from '../../utils/formatPrice';
 import { enrichProduct } from '../../utils/enrichProduct';
 import { FREE_SHIP_AT, SHIPPING_FLAT } from '../../config/toyStore';
@@ -15,6 +16,7 @@ const steps = ['Cart', 'Delivery', 'Payment', 'Confirm'];
 export default function CheckoutFlow() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { phone } = useGuestPhone();
   const [step, setStep] = useState(1);
   const [cartItems, setLocalItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,9 +30,15 @@ export default function CheckoutFlow() {
   const F = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
   const loadCart = useCallback(async () => {
+    const clean = normalizeStoredPhone(phone);
     try {
       setLoading(true);
-      const res = await apiService.getCartItems();
+      if (!clean) {
+        setLocalItems([]);
+        dispatch(setCartItems({ items: [] }));
+        return;
+      }
+      const res = await apiService.getCartItems(clean);
       const items = res?.data?.items || [];
       setLocalItems(items);
       dispatch(setCartItems(res.data));
@@ -39,9 +47,16 @@ export default function CheckoutFlow() {
     } finally {
       setLoading(false);
     }
-  }, [dispatch]);
+  }, [dispatch, phone]);
 
   useEffect(() => { loadCart(); }, [loadCart]);
+
+  useEffect(() => {
+    const clean = normalizeStoredPhone(phone);
+    if (clean && !form.phone) {
+      setForm((f) => ({ ...f, phone: clean }));
+    }
+  }, [phone, form.phone]);
 
   const cartSub = cartItems.reduce((a, i) => a + (i.productId?.price || 0) * (i.quantity || 0), 0);
   const ship = cartSub >= FREE_SHIP_AT ? 0 : SHIPPING_FLAT;
@@ -56,9 +71,14 @@ export default function CheckoutFlow() {
   });
 
   const placeOrder = async () => {
+    const clean = normalizeStoredPhone(phone);
+    if (!clean) {
+      toast.error('WhatsApp number missing — go back to cart.');
+      return;
+    }
     try {
       setSubmitting(true);
-      const result = await apiService.checkout();
+      const result = await apiService.checkout(clean);
       dispatch(setCartItems({ items: [] }));
       toast.success('Order placed!');
       navigate('/order-success', {

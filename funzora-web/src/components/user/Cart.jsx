@@ -5,6 +5,7 @@ import {
   AlertCircle,
   Loader2,
   Lock,
+  MessageCircle,
   Package,
   RotateCcw,
   ShoppingCart,
@@ -14,6 +15,8 @@ import {
 import { apiService } from '../../services/apiService';
 import { toast } from 'react-hot-toast';
 import { setCartItems } from '../../store/slices/cartSlice';
+import { bumpCartRefresh } from '../../store/slices/authSlice';
+import { useGuestPhone, normalizeStoredPhone } from '../../contexts/GuestPhoneContext';
 import { enrichProduct } from '../../utils/enrichProduct';
 import { formatPrice } from '../../utils/formatPrice';
 import { FREE_SHIP_AT, SHIPPING_FLAT } from '../../config/toyStore';
@@ -24,15 +27,40 @@ const fontCart = "font-['Inter',var(--font-body),sans-serif]";
 const Cart = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { phone, ensureGuestPhone } = useGuestPhone();
   const [cartData, setCartData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [updating, setUpdating] = useState(false);
+  const [identityReady, setIdentityReady] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        await ensureGuestPhone({ intent: 'cart' });
+      } catch {
+        /* dismissed */
+      }
+      if (!cancelled) setIdentityReady(true);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [ensureGuestPhone]);
 
   const fetchCartItems = useCallback(async () => {
+    const clean = normalizeStoredPhone(phone);
+    if (!clean) {
+      setCartData(null);
+      dispatch(setCartItems({ items: [] }));
+      setError(null);
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
-      const cartResponse = await apiService.getCartItems();
+      const cartResponse = await apiService.getCartItems(clean);
       if (cartResponse?.data) dispatch(setCartItems(cartResponse.data));
       setCartData(cartResponse);
       setError(null);
@@ -42,17 +70,33 @@ const Cart = () => {
     } finally {
       setLoading(false);
     }
-  }, [dispatch]);
+  }, [dispatch, phone]);
 
   useEffect(() => {
+    if (!identityReady) return;
     fetchCartItems();
-  }, [fetchCartItems]);
+  }, [identityReady, fetchCartItems]);
+
+  const promptAgain = async () => {
+    try {
+      await ensureGuestPhone({ intent: 'cart' });
+      dispatch(bumpCartRefresh());
+    } catch {
+      /* closed */
+    }
+  };
 
   const handleUpdateQuantity = async (item, action) => {
+    const clean = normalizeStoredPhone(phone);
+    if (!clean) {
+      toast.error('WhatsApp number required');
+      return;
+    }
     try {
       setUpdating(true);
-      await apiService.updateCartItem(item.productId._id, action);
+      await apiService.updateCartItem(clean, item.productId._id, action);
       await fetchCartItems();
+      dispatch(bumpCartRefresh());
       toast.success('Cart updated');
     } catch (err) {
       toast.error(err.message || 'Failed to update');
@@ -62,10 +106,16 @@ const Cart = () => {
   };
 
   const handleRemoveItem = async (item) => {
+    const clean = normalizeStoredPhone(phone);
+    if (!clean) {
+      toast.error('WhatsApp number required');
+      return;
+    }
     try {
       setUpdating(true);
-      await apiService.removeCartItem(item?.productId?._id);
+      await apiService.removeCartItem(clean, item?.productId?._id);
       await fetchCartItems();
+      dispatch(bumpCartRefresh());
       toast.success('Item removed');
     } catch (err) {
       toast.error(err.message || 'Failed to remove');
@@ -73,6 +123,27 @@ const Cart = () => {
       setUpdating(false);
     }
   };
+
+  if (!identityReady || !normalizeStoredPhone(phone)) {
+    return (
+      <div className={`bb-page ${fontCart}`}>
+        <h1 className="text-title bb-head mb-6">Shopping cart</h1>
+        <div className="empty-state px-6 py-16">
+          <MessageCircle size={56} strokeWidth={ICON_STROKE} className="mx-auto text-[var(--color-primary)]" aria-hidden />
+          <span className="empty-state-title">Enter your WhatsApp number</span>
+          <span className="empty-state-sub text-neutral-500 max-w-md mx-auto">
+            Enter your WhatsApp number to view your cart — no password needed.
+          </span>
+          <button type="button" className="btn btn--primary mt-4" onClick={promptAgain}>
+            Continue with WhatsApp
+          </button>
+          <button type="button" className="btn btn--ghost mt-3" onClick={() => navigate('/shop')}>
+            Browse shop
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (

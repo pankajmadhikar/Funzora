@@ -47,6 +47,10 @@ const Login = () => {
     try {
       const response = await apiService.login(formData);
       if (response.success) {
+        if (response.user?.role !== 'admin') {
+          toast.error('This login is for FunZora admins only. Shoppers use WhatsApp at checkout.');
+          return;
+        }
         localStorage.setItem('token', response.token);
         localStorage.setItem('user', JSON.stringify(response.user));
         dispatch(setCredentials({ user: response.user, token: response.token }));

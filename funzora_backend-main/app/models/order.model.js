@@ -5,7 +5,12 @@ const OrderSchema = new mongoose.Schema(
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
+    },
+    /** Set for WhatsApp-first guest checkout when userId is absent */
+    customerPhone: {
+      type: String,
+      trim: true,
     },
     products: [
       {

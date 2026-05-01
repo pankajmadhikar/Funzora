@@ -5,6 +5,7 @@ const initialState = {
   token: null,
   isAuthenticated: false,
   isLoading: true,
+  cartTick: 0,
 };
 
 const authSlice = createSlice({
@@ -27,10 +28,13 @@ const authSlice = createSlice({
     setLoading: (state, action) => {
       state.isLoading = action.payload;
     },
+    bumpCartRefresh: (state) => {
+      state.cartTick += 1;
+    },
   },
 });
 
-export const { setCredentials, logout, setLoading } = authSlice.actions;
+export const { setCredentials, logout, setLoading, bumpCartRefresh } = authSlice.actions;
 
 export const selectCurrentUser = (state) => state.auth.user;
 export const selectIsAuthenticated = (state) => state.auth.isAuthenticated;

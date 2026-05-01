@@ -2,15 +2,16 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { toast } from 'react-hot-toast';
-import { Eye, Heart, Package, Star } from 'lucide-react';
+import { Heart, Package, Star } from 'lucide-react';
 import { apiService } from '../../services/apiService';
 import { setCartItems } from '../../store/slices/cartSlice';
-import { setRefreshCartItems } from '../../redux/slices/authSlice';
+import { bumpCartRefresh } from '../../store/slices/authSlice';
 import { formatPrice } from '../../utils/formatPrice';
 import { enrichProduct, discPct } from '../../utils/enrichProduct';
 import { toggleWishlist, isInWishlist } from '../../utils/wishlistStorage';
 import { ICON_STROKE, ICON_SIZES } from '../../constants/appIconTokens';
 import { createWhatsAppCheckoutLink } from '../../utils/whatsappCheckout';
+import { useGuestPhone } from '../../contexts/GuestPhoneContext';
 
 const fontCard = "font-['Inter',var(--font-body),sans-serif]";
 
@@ -24,6 +25,7 @@ function selectCartLines(state) {
 export default function ToyProductCard({ product: raw, compact = false }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { phone, ensureGuestPhone } = useGuestPhone();
   const cartLines = useSelector(selectCartLines);
   const [adding, setAdding] = useState(false);
   const [updatingQty, setUpdatingQty] = useState(false);
@@ -46,19 +48,31 @@ export default function ToyProductCard({ product: raw, compact = false }) {
 
   const goDetail = () => navigate(`/product/${product._id}`);
 
-  const refreshCart = async () => {
-    const cartResponse = await apiService.getCartItems();
+  const refreshCart = async (digits) => {
+    const clean = String(digits || '').replace(/\D/g, '').slice(-10);
+    if (clean.length !== 10) {
+      dispatch(setCartItems({ items: [] }));
+      dispatch(bumpCartRefresh());
+      return;
+    }
+    const cartResponse = await apiService.getCartItems(clean);
     if (cartResponse?.data) dispatch(setCartItems(cartResponse.data));
-    dispatch(setRefreshCartItems());
+    dispatch(bumpCartRefresh());
   };
 
   const addCart = async (e) => {
     e?.stopPropagation();
     if (adding || u.stock <= 0) return;
+    let digits;
+    try {
+      digits = await ensureGuestPhone({ intent: 'generic' });
+    } catch {
+      return;
+    }
     try {
       setAdding(true);
-      await apiService.addToCart(product._id, 1);
-      await refreshCart();
+      await apiService.addToCart(digits, product._id, 1);
+      await refreshCart(digits);
       toast.success(`${product.name} added`);
     } catch (err) {
       toast.error(err.message || 'Could not add to cart');
@@ -77,18 +91,26 @@ export default function ToyProductCard({ product: raw, compact = false }) {
   const changeCartQty = async (delta, e) => {
     e.stopPropagation();
     if (updatingQty) return;
+    let digits = String(phone || '').replace(/\D/g, '').slice(-10);
+    if (digits.length !== 10) {
+      try {
+        digits = await ensureGuestPhone({ intent: 'generic' });
+      } catch {
+        return;
+      }
+    }
     try {
       setUpdatingQty(true);
       if (delta < 0) {
         if (cartQty <= 1) {
-          await apiService.removeCartItem(product._id);
+          await apiService.removeCartItem(digits, product._id);
         } else {
-          await apiService.updateCartItem(product._id, 'decrease');
+          await apiService.updateCartItem(digits, product._id, 'decrease');
         }
       } else {
-        await apiService.updateCartItem(product._id, 'increase');
+        await apiService.updateCartItem(digits, product._id, 'increase');
       }
-      await refreshCart();
+      await refreshCart(digits);
     } catch (err) {
       toast.error(err.message || 'Could not update cart');
     } finally {

@@ -18,6 +18,8 @@ const getAuthHeaders = () => ({
   Authorization: `Bearer ${authService.getToken()}`,
 });
 
+const jsonHeaders = { "Content-Type": "application/json" };
+
 export const apiService = {
   login: async (credentials) => {
     try {
@@ -53,6 +55,16 @@ export const apiService = {
     }
   },
 
+  /** Guest identity — no JWT. Persists client-side as user_phone after success. */
+  whatsappLogin: async (phone) => {
+    const response = await fetch(`${BASE_URL}/auth/whatsapp-login`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify({ phone }),
+    });
+    return handleResponse(response);
+  },
+
   // Protected endpoints
   getProducts: async (filters = {}) => {
     try {
@@ -65,10 +77,7 @@ export const apiService = {
       const query = params.toString() ? `?${params.toString()}` : "";
       const response = await fetch(`${BASE_URL}/products${query}`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authService.getToken()}`,
-        },
+        headers: jsonHeaders,
       });
 
       const result = await handleResponse(response);
@@ -88,10 +97,7 @@ export const apiService = {
     try {
       const response = await fetch(`${BASE_URL}/products/${productId}`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authService.getToken()}`,
-        },
+        headers: jsonHeaders,
       });
 
       const result = await handleResponse(response);
@@ -109,15 +115,13 @@ export const apiService = {
     }
   },
 
-  addToCart: async (productId, quantity) => {
+  addToCart: async (phone, productId, quantity) => {
     try {
       const response = await fetch(`${BASE_URL}/carts/create-cart`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authService.getToken()}`,
-        },
+        headers: jsonHeaders,
         body: JSON.stringify({
+          phone,
           productId,
           quantity,
         }),
@@ -137,24 +141,30 @@ export const apiService = {
   },
 
   // Get Cart Items
-  getCartItems: async () => {
+  getCartItems: async (phone) => {
+    if (!phone || String(phone).replace(/\D/g, "").length < 10) {
+      throw new Error("Phone number is required to load your cart");
+    }
     try {
-      const response = await fetch(`${BASE_URL}/carts/create-cart`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authService.getToken()}`,
-        },
-      });
+      const clean = String(phone).replace(/\D/g, "").slice(-10);
+      const response = await fetch(
+        `${BASE_URL}/carts/create-cart?phone=${encodeURIComponent(clean)}`,
+        {
+          method: "GET",
+          headers: jsonHeaders,
+        }
+      );
 
       const result = await handleResponse(response);
-      console.log("Cart API Response:", result); // Debug log
 
       if (!result.success) {
         throw new Error(result.message || "Failed to fetch cart items");
       }
 
-      return result;
+      const payload = result.data;
+      const items = Array.isArray(payload?.items) ? payload.items : [];
+
+      return { ...result, data: { ...payload, items } };
     } catch (error) {
       console.error("Error fetching cart:", error);
       throw new Error(error.message || "Failed to fetch cart items");
@@ -162,16 +172,17 @@ export const apiService = {
   },
 
   // Update Cart Item Quantity
-  updateCartItem: async (productId, action) => {
+  updateCartItem: async (phone, productId, action) => {
     try {
-      const response = await fetch(`${BASE_URL}/carts/item/${productId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authService.getToken()}`,
-        },
-        body: JSON.stringify({ action }),
-      });
+      const clean = String(phone).replace(/\D/g, "").slice(-10);
+      const response = await fetch(
+        `${BASE_URL}/carts/item/${productId}?phone=${encodeURIComponent(clean)}`,
+        {
+          method: "PUT",
+          headers: jsonHeaders,
+          body: JSON.stringify({ action, phone: clean }),
+        }
+      );
 
       const result = await handleResponse(response);
 
@@ -181,7 +192,6 @@ export const apiService = {
 
       return result.data;
     } catch (error) {
-      // If it's a 400 error, it means we hit the quantity limit
       if (error.message.includes("units of this product are available")) {
         throw new Error("Maximum quantity limit reached");
       }
@@ -190,17 +200,17 @@ export const apiService = {
     }
   },
 
-  // Remove Cart Item
-  removeCartItem: async (cartId) => {
-    console.log("cartId",cartId)
+  // Remove Cart Item — productId in path
+  removeCartItem: async (phone, productId) => {
     try {
-      const response = await fetch(`${BASE_URL}/carts/item/${cartId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authService.getToken()}`,
-        },
-      });
+      const clean = String(phone).replace(/\D/g, "").slice(-10);
+      const response = await fetch(
+        `${BASE_URL}/carts/item/${productId}?phone=${encodeURIComponent(clean)}`,
+        {
+          method: "DELETE",
+          headers: jsonHeaders,
+        }
+      );
 
       const result = await handleResponse(response);
 
@@ -338,14 +348,13 @@ export const apiService = {
     }
   },
 
-  checkout: async () => {
+  checkout: async (phone) => {
     try {
+      const clean = String(phone || "").replace(/\D/g, "").slice(-10);
       const response = await fetch(`${BASE_URL}/carts/checkout`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authService.getToken()}`,
-        },
+        headers: jsonHeaders,
+        body: JSON.stringify({ phone: clean }),
       });
 
       const result = await handleResponse(response);
@@ -393,7 +402,7 @@ export const apiService = {
         `${BASE_URL}/products/search?q=${encodeURIComponent(query)}`,
         {
           method: "GET",
-          headers: getAuthHeaders(),
+          headers: jsonHeaders,
         }
       );
 

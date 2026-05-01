@@ -191,6 +191,7 @@ function SidebarContent({ role, onNav, pathname, search, expanded, onToggle, onA
         )}
       </nav>
 
+      {isAdmin && (
       <div className="mt-auto shrink-0 border-t border-neutral-200/80 pt-3">
         <button
           type="button"
@@ -206,6 +207,7 @@ function SidebarContent({ role, onNav, pathname, search, expanded, onToggle, onA
           {expanded && <span>Account</span>}
         </button>
       </div>
+      )}
     </div>
   );
 }

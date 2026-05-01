@@ -5,18 +5,17 @@ import { store } from './store/store';
 import { Box, Button, Container, Typography, useMediaQuery, useTheme, ThemeProvider } from '@mui/material';
 import { theme as appTheme } from './theme/index';
 import AuthProvider from './components/auth/AuthProvider';
+import { GuestPhoneProvider } from './contexts/GuestPhoneContext';
 import Footer from './components/Footer';
 import Login from './components/auth/Login';
-import Register from './components/auth/Register';
 import Home from './components/Home';
 import Cart from './components/user/Cart';
 import ProductDetails from './components/user/ProductDetails';
-import Profile from './components/user/Profile';
 import AdminDashboard from './components/admin/AdminDashboard';
 import AddProduct from './components/admin/AddProduct';
 import ManageProducts from './components/admin/ManageProducts';
 import Orders from './components/admin/Orders';
-import ProtectedRoute from './components/auth/ProtectedRoute';
+import AdminRoute from './components/auth/AdminRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import { Toaster } from 'react-hot-toast';
 import Categories from './components/Categories';
@@ -42,25 +41,34 @@ function AppShell() {
     try {
       const raw = localStorage.getItem(SIDEBAR_LS_KEY);
       return raw === null ? true : raw === 'true';
-    } catch { return true; }
+    } catch {
+      return true;
+    }
   });
   const [accountMenu, setAccountMenu] = useState(null);
 
   const toggleSidebar = () => {
     setSidebarExpanded((prev) => {
       const next = !prev;
-      try { localStorage.setItem(SIDEBAR_LS_KEY, String(next)); } catch {}
+      try {
+        localStorage.setItem(SIDEBAR_LS_KEY, String(next));
+      } catch {}
       return next;
     });
   };
 
   const { user, isAuthenticated } = useSelector((s) => s.auth);
-  const isValidUser = user && typeof user === 'object';
-  const userRole = isValidUser ? user.role || 'user' : 'user';
+  const sidebarRole = isAuthenticated && user?.role === 'admin' ? 'admin' : 'user';
 
-  const isAuthPage = location.pathname === '/login' || location.pathname === '/register';
-  // const showChrome = isAuthenticated && isValidUser && !isAuthPage;
-  const showChrome = true;
+  const showChrome = location.pathname !== '/login';
+
+  const sidebarInset = showChrome && isDesktop ? getSidebarWidthPx(sidebarExpanded) : 0;
+
+  const showOfferPopup =
+    showChrome && sidebarRole !== 'admin' && location.pathname !== '/login';
+
+  const showAdminMenu =
+    sidebarRole === 'admin' && isAuthenticated && !!user?.role;
 
   return (
     <Box className="bb-root" sx={{ minHeight: '100vh', bgcolor: 'var(--color-bg)' }}>
@@ -68,7 +76,7 @@ function AppShell() {
         <AppSidebar
           open={sideOpen}
           onClose={() => setSideOpen(false)}
-          role={"admin"|| 'user' }
+          role={sidebarRole}
           expanded={sidebarExpanded}
           onToggleExpanded={toggleSidebar}
           onAccountMenuOpen={(e) => setAccountMenu({ anchorEl: e.currentTarget, source: 'sidebar' })}
@@ -77,7 +85,7 @@ function AppShell() {
 
       <Box
         sx={{
-          ml: showChrome && isDesktop ? `${getSidebarWidthPx(sidebarExpanded)}px` : 0,
+          ml: showChrome && isDesktop ? `${sidebarInset}px` : 0,
           display: 'flex',
           flexDirection: 'column',
           minHeight: '100vh',
@@ -91,7 +99,7 @@ function AppShell() {
           />
         )}
 
-        {showChrome && (
+        {showChrome && showAdminMenu && (
           <AccountUserMenu
             anchorState={accountMenu}
             onClose={() => setAccountMenu(null)}
@@ -101,26 +109,22 @@ function AppShell() {
           />
         )}
 
-        {/* No flex-grow: avoids a tall empty band inside main above the footer */}
         <Box component="main" sx={{ flex: '0 1 auto', width: '100%' }}>
           <Routes>
-            {/* <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} /> */}
-              <Route path="/" element={<Home />} />
-              <Route path="/shop" element={<ShopPage />} />
-              <Route path="/product/:id" element={<ProductDetails />} />
-              <Route path="/categories" element={<Categories />} />
-              <Route path="/gift-finder" element={<GiftFinderPage />} />
+            <Route path="/login" element={<Login />} />
 
-            <Route element={<ProtectedRoute requiredRole="user" />}>
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/checkout" element={<CheckoutFlow />} />
-              <Route path="/order-success" element={<OrderSuccessPage />} />
-              <Route path="/wishlist" element={<WishlistPage />} />
-            </Route>
+            <Route path="/" element={<Home />} />
+            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/product/:id" element={<ProductDetails />} />
+            <Route path="/categories" element={<Categories />} />
+            <Route path="/gift-finder" element={<GiftFinderPage />} />
 
-            <Route element={<ProtectedRoute requiredRole="admin" />}>
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<CheckoutFlow />} />
+            <Route path="/order-success" element={<OrderSuccessPage />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
+
+            <Route element={<AdminRoute />}>
               <Route path="/admin">
                 <Route index element={<AdminDashboard />} />
                 <Route path="add-product" element={<AddProduct />} />
@@ -148,8 +152,8 @@ function AppShell() {
 
         {showChrome && <Footer />}
 
-        {showChrome && userRole !== 'admin' && (
-          <SpecialOfferPopup insetLeftPx={isDesktop ? getSidebarWidthPx(sidebarExpanded) : 0} />
+        {showOfferPopup && (
+          <SpecialOfferPopup insetLeftPx={isDesktop ? sidebarInset : 0} />
         )}
       </Box>
 
@@ -165,7 +169,9 @@ function App() {
         <ErrorBoundary>
           <AuthProvider>
             <BrowserRouter>
-              <AppShell />
+              <GuestPhoneProvider>
+                <AppShell />
+              </GuestPhoneProvider>
             </BrowserRouter>
           </AuthProvider>
         </ErrorBoundary>

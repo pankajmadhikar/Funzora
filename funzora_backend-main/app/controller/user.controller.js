@@ -57,6 +57,13 @@ exports.loginUser = asyncHandler(async (req, res) => {
       .json({ success: false, message: "Invalid credentials" });
   }
 
+  if (user.role !== "admin") {
+    return res.status(403).json({
+      success: false,
+      message: "Staff login only. Customers check out with WhatsApp on the store.",
+    });
+  }
+
   const token = jwt.sign(
     { userId: user.id, role: user.role },
     process.env.JWT_SECRET

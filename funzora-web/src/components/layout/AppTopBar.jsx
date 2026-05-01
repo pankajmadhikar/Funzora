@@ -3,9 +3,11 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { Heart, Menu, Search, ShoppingCart, Sparkles } from 'lucide-react';
 import { setCartItems } from '../../store/slices/cartSlice';
+import { bumpCartRefresh } from '../../store/slices/authSlice';
 import { apiService } from '../../services/apiService';
 import CartBagDrawer from '../storefront/CartBagDrawer';
 import { ICON_STROKE, ICON_SIZES } from '../../constants/appIconTokens';
+import { useGuestPhone } from '../../contexts/GuestPhoneContext';
 import './AppTopBar.css';
 
 export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
@@ -13,7 +15,9 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const { user, isAuthenticated, cartItemRefresher } = useSelector((s) => s.auth);
+  const { user, isAuthenticated, cartTick } = useSelector((s) => s.auth);
+  const { phone, ensureGuestPhone } = useGuestPhone();
+
   const cartPayload = useSelector((s) => s.cart.cartItems);
   const items = cartPayload?.items || [];
   const cartCount = items.reduce((a, i) => a + (i.quantity || 0), 0);
@@ -21,8 +25,7 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
   const [search, setSearch] = useState('');
   const [cartOpen, setCartOpen] = useState(false);
 
-  const isValidUser = user && typeof user === 'object';
-  const userRole = isValidUser ? user.role || 'user' : 'user';
+  const isAdminUser = !!(isAuthenticated && user && user.role === 'admin');
 
   useEffect(() => {
     if (location.pathname === '/shop') {
@@ -32,17 +35,23 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
   }, [location.pathname, location.search]);
 
   const refreshCart = useCallback(async () => {
+    if (isAdminUser) return;
+    const clean = String(phone ?? '').replace(/\D/g, '').slice(-10);
+    if (!phone || clean.length !== 10) {
+      dispatch(setCartItems({ items: [] }));
+      return;
+    }
     try {
-      const res = await apiService.getCartItems();
+      const res = await apiService.getCartItems(clean);
       if (res?.data) dispatch(setCartItems(res.data));
     } catch {
       dispatch(setCartItems({ items: [] }));
     }
-  }, [dispatch]);
+  }, [dispatch, phone, isAdminUser]);
 
   useEffect(() => {
-    if (isAuthenticated && userRole !== 'admin') refreshCart();
-  }, [isAuthenticated, userRole, cartItemRefresher, refreshCart]);
+    refreshCart();
+  }, [phone, cartTick, isAdminUser, refreshCart]);
 
   const goShop = (params = {}) => {
     const q = new URLSearchParams(params).toString();
@@ -59,7 +68,17 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
     if (e.key === 'Enter') onSearchSubmit();
   };
 
-  if (!isAuthenticated || !isValidUser) return null;
+  /** Cart: require WhatsApp identity for guests (no JWT). */
+  const openCartAfterIdentity = async () => {
+    if (isAdminUser) return;
+    try {
+      await ensureGuestPhone({ intent: 'cart' });
+      setCartOpen(true);
+      dispatch(bumpCartRefresh());
+    } catch {
+      /* modal dismissed */
+    }
+  };
 
   return (
     <>
@@ -76,7 +95,7 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
             </button>
           )}
 
-          <Link to={userRole === 'admin' ? '/admin' : '/'} className="fz-header-logo group" onClick={() => setSearch('')}>
+          <Link to={isAdminUser ? '/admin' : '/'} className="fz-header-logo group" onClick={() => setSearch('')}>
             <div className="fz-header-logo-icon">
               <Sparkles size={ICON_SIZES.lg} strokeWidth={ICON_STROKE} className="text-neutral-400 transition-colors group-hover:text-[var(--color-primary)]" aria-hidden />
             </div>
@@ -88,7 +107,7 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
             </div>
           </Link>
 
-          {userRole !== 'admin' && (
+          {!isAdminUser && (
             <div className="fz-header-search">
               <span className="fz-header-search-icon" aria-hidden>
                 <Search size={ICON_SIZES.md} strokeWidth={ICON_STROKE} className="text-neutral-400" />
@@ -106,7 +125,7 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
             </div>
           )}
 
-          {userRole !== 'admin' && (
+          {!isAdminUser && (
             <div className="fz-header-actions">
               <button type="button" className="group fz-header-action" onClick={() => navigate('/wishlist')}>
                 <span className="fz-header-action-icon" aria-hidden>
@@ -114,7 +133,11 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
                 </span>
                 <span className="fz-header-action-label">Wishlist</span>
               </button>
-              <button type="button" className="group fz-header-action fz-header-cart" onClick={() => setCartOpen(true)}>
+              <button
+                type="button"
+                className="group fz-header-action fz-header-cart"
+                onClick={openCartAfterIdentity}
+              >
                 <span className="fz-header-action-icon" aria-hidden>
                   <ShoppingCart size={ICON_SIZES.md} strokeWidth={ICON_STROKE} className="text-neutral-400 transition-colors group-hover:text-neutral-600" />
                 </span>
@@ -126,7 +149,9 @@ export default function AppTopBar({ onMenuClick, showMenuButton = false }) {
         </div>
       </header>
 
-      <CartBagDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+      {!isAdminUser && (
+        <CartBagDrawer open={cartOpen} onClose={() => setCartOpen(false)} />
+      )}
     </>
   );
 }

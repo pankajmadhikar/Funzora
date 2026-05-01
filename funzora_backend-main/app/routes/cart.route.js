@@ -4,19 +4,19 @@ const {
   viewCart,
   checkoutCart,
   updateCartItemQuantity,
-  removeCartItem
+  removeCartItem,
 } = require("../controller/cart.controller");
-const { protect } = require("../middlewares/auth");
 
+/** Guest cart — phone in body or ?phone=. No JWT. */
 const router = express.Router();
 
-router.route("/create-cart").post(protect, addToCart).get(protect, viewCart);
+router.route("/create-cart").post(addToCart).get(viewCart);
 
-router.route("/item/:productId").put(protect, updateCartItemQuantity);
+router.route("/checkout").post(checkoutCart);
 
-router.route("/checkout").post(protect, checkoutCart);
-
-router.route("/item/:productId").delete(protect, removeCartItem);
-
+router
+  .route("/item/:productId")
+  .put(updateCartItemQuantity)
+  .delete(removeCartItem);
 
 module.exports = router;

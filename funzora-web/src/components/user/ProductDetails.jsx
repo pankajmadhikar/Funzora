@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { CircularProgress } from '@mui/material';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { apiService } from '../../services/apiService';
 import toast from 'react-hot-toast';
-import { setRefreshCartItems } from '../../redux/slices/authSlice';
+import { bumpCartRefresh } from '../../store/slices/authSlice';
 import { setCartItems } from '../../store/slices/cartSlice';
+import { useGuestPhone } from '../../contexts/GuestPhoneContext';
 import { enrichProduct, enrichProducts, discPct } from '../../utils/enrichProduct';
 import { formatPrice } from '../../utils/formatPrice';
 import { toggleWishlist, isInWishlist } from '../../utils/wishlistStorage';
@@ -16,7 +17,7 @@ import { createWhatsAppCheckoutLink } from '../../utils/whatsappCheckout';
 function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
+  const { ensureGuestPhone } = useGuestPhone();
   const [product, setProduct] = useState(null);
   const [allProducts, setAllProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,29 +57,40 @@ function ProductDetails() {
     return enrichProducts(allProducts).filter((p) => p._id !== ep._id && p._ui.displayCatId === ep._ui.displayCatId).slice(0, 4);
   }, [allProducts, ep]);
 
-  const syncCart = async () => {
-    const r = await apiService.getCartItems();
+  const syncCart = async (digits) => {
+    const clean = String(digits || '').replace(/\D/g, '').slice(-10);
+    const r = await apiService.getCartItems(clean);
     if (r?.data) dispatch(setCartItems(r.data));
-    dispatch(setRefreshCartItems());
+    dispatch(bumpCartRefresh());
   };
 
   const handleAddToCart = async () => {
-    if (!user) { navigate('/login'); return; }
+    let digits;
+    try {
+      digits = await ensureGuestPhone({ intent: 'generic' });
+    } catch {
+      return;
+    }
     try {
       setAddingToCart(true);
-      await apiService.addToCart(id, quantity);
-      await syncCart();
+      await apiService.addToCart(digits, id, quantity);
+      await syncCart(digits);
       toast.success(`Added ${quantity} item${quantity > 1 ? 's' : ''} to bag`);
     } catch (err) { toast.error(err.message || 'Failed to add'); }
     finally { setAddingToCart(false); }
   };
 
   const buyNow = async () => {
-    if (!user) { navigate('/login'); return; }
+    let digits;
+    try {
+      digits = await ensureGuestPhone({ intent: 'generic' });
+    } catch {
+      return;
+    }
     try {
       setAddingToCart(true);
-      await apiService.addToCart(id, quantity);
-      await syncCart();
+      await apiService.addToCart(digits, id, quantity);
+      await syncCart(digits);
       navigate('/checkout');
     } catch (err) { toast.error(err.message || 'Failed'); }
     finally { setAddingToCart(false); }
@@ -208,8 +220,7 @@ function ProductDetails() {
           </div>
 
           {/* Purchase controls */}
-          {user?.role === 'user' && (
-            <div className="pd-purchase">
+          <div className="pd-purchase">
               <div className="pd-qty-row">
                 <span className="pd-qty-label">Quantity:</span>
                 <div className="pd-qty-counter">
@@ -250,7 +261,6 @@ function ProductDetails() {
                 {wish ? '❤ Saved to Wishlist' : '♡ Add to Wishlist'}
               </button>
             </div>
-          )}
         </div>
       </div>
 

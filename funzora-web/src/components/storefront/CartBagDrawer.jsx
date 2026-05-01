@@ -6,6 +6,8 @@ import { toast } from 'react-hot-toast';
 import { ShoppingBag, Trash2, X } from 'lucide-react';
 import { apiService } from '../../services/apiService';
 import { setCartItems } from '../../store/slices/cartSlice';
+import { bumpCartRefresh } from '../../store/slices/authSlice';
+import { useGuestPhone, normalizeStoredPhone } from '../../contexts/GuestPhoneContext';
 import { formatPrice } from '../../utils/formatPrice';
 import { enrichProduct } from '../../utils/enrichProduct';
 import { FREE_SHIP_AT, SHIPPING_FLAT } from '../../config/toyStore';
@@ -15,22 +17,28 @@ const ICON = { size: 18, strokeWidth: 2 };
 export default function CartBagDrawer({ open, onClose }) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { phone } = useGuestPhone();
   const cartPayload = useSelector((s) => s.cart.cartItems);
   const items = cartPayload?.items || [];
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const refresh = useCallback(async () => {
+    const clean = normalizeStoredPhone(phone);
     try {
       setLoading(true);
-      const res = await apiService.getCartItems();
+      if (!clean) {
+        dispatch(setCartItems({ items: [] }));
+        return;
+      }
+      const res = await apiService.getCartItems(clean);
       if (res?.data) dispatch(setCartItems(res.data));
     } catch {
       dispatch(setCartItems({ items: [] }));
     } finally {
       setLoading(false);
     }
-  }, [dispatch]);
+  }, [dispatch, phone]);
 
   useEffect(() => {
     if (open) refresh();
@@ -47,11 +55,13 @@ export default function CartBagDrawer({ open, onClose }) {
 
   const updQty = async (item, action) => {
     const pid = item.productId?._id;
-    if (!pid) return;
+    const clean = normalizeStoredPhone(phone);
+    if (!pid || !clean) return;
     try {
       setBusy(true);
-      await apiService.updateCartItem(pid, action);
+      await apiService.updateCartItem(clean, pid, action);
       await refresh();
+      dispatch(bumpCartRefresh());
       toast.success('Cart updated');
     } catch (e) {
       toast.error(e.message || 'Update failed');
@@ -62,11 +72,13 @@ export default function CartBagDrawer({ open, onClose }) {
 
   const remove = async (item) => {
     const pid = item.productId?._id;
-    if (!pid) return;
+    const clean = normalizeStoredPhone(phone);
+    if (!pid || !clean) return;
     try {
       setBusy(true);
-      await apiService.removeCartItem(pid);
+      await apiService.removeCartItem(clean, pid);
       await refresh();
+      dispatch(bumpCartRefresh());
       toast.success('Removed');
     } catch (e) {
       toast.error(e.message || 'Remove failed');
