@@ -12,7 +12,7 @@ import { formatPrice } from '../../utils/formatPrice';
 import { toggleWishlist, isInWishlist } from '../../utils/wishlistStorage';
 import ToyProductCard from '../storefront/ToyProductCard';
 import './ProductDetails.css';
-import { createWhatsAppCheckoutLink } from '../../utils/whatsappCheckout';
+import { createWhatsAppCheckoutLink, resolveProductPageUrl } from '../../utils/whatsappCheckout';
 
 function ProductDetails() {
   const { id } = useParams();
@@ -120,9 +120,18 @@ function ProductDetails() {
   const d = discPct(product.price, product.mrp);
   const stock = u.stock;
   const images = product.images?.length ? product.images : [];
+  const unit = Number(ep?.price ?? product.price) || 0;
   const waLink = createWhatsAppCheckoutLink({
-    products: [{ name: product.name, quantity }],
-    giftWrap: !!(product.isBestForGifting || product.productLayer === 'bundle'),
+    cartItems: [
+      {
+        name: product.name,
+        quantity,
+        price: unit,
+        productUrl: resolveProductPageUrl(product._id),
+        emoji: u.emoji,
+      },
+    ],
+    grandTotal: unit * quantity,
   });
 
   const prevImg = () => setSelectedImage((i) => (i - 1 + images.length) % images.length);

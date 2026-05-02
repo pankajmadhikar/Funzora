@@ -65,6 +65,32 @@ export const apiService = {
     return handleResponse(response);
   },
 
+  /** Saved delivery profile for phone identity (guest, no JWT). */
+  getDeliveryAddress: async (phone) => {
+    const clean = String(phone || "").replace(/\D/g, "").slice(-10);
+    if (clean.length !== 10) {
+      throw new Error("Phone required");
+    }
+    const response = await fetch(
+      `${BASE_URL}/user/address/${encodeURIComponent(clean)}`,
+      { method: "GET", headers: jsonHeaders },
+    );
+    return handleResponse(response);
+  },
+
+  saveDeliveryAddress: async (phone, address) => {
+    const clean = String(phone || "").replace(/\D/g, "").slice(-10);
+    if (clean.length !== 10) {
+      throw new Error("Phone required");
+    }
+    const response = await fetch(`${BASE_URL}/user/address/save`, {
+      method: "POST",
+      headers: jsonHeaders,
+      body: JSON.stringify({ phone: clean, address }),
+    });
+    return handleResponse(response);
+  },
+
   // Protected endpoints
   getProducts: async (filters = {}) => {
     try {

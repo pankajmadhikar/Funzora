@@ -10,7 +10,7 @@ import { formatPrice } from '../../utils/formatPrice';
 import { enrichProduct, discPct } from '../../utils/enrichProduct';
 import { toggleWishlist, isInWishlist } from '../../utils/wishlistStorage';
 import { ICON_STROKE, ICON_SIZES } from '../../constants/appIconTokens';
-import { createWhatsAppCheckoutLink } from '../../utils/whatsappCheckout';
+import { createWhatsAppCheckoutLink, resolveProductPageUrl } from '../../utils/whatsappCheckout';
 import { useGuestPhone } from '../../contexts/GuestPhoneContext';
 
 const fontCard = "font-['Inter',var(--font-body),sans-serif]";
@@ -125,8 +125,16 @@ export default function ToyProductCard({ product: raw, compact = false }) {
   const primaryCls = 'text-[var(--color-primary)]';
   const primaryBg = 'bg-[var(--color-primary)]';
   const waLink = createWhatsAppCheckoutLink({
-    products: [{ name: product.name, quantity: 1 }],
-    giftWrap: !!(product.isBestForGifting || product.productLayer === 'bundle'),
+    cartItems: [
+      {
+        name: product.name,
+        quantity: 1,
+        price: Number(product.price) || 0,
+        productUrl: resolveProductPageUrl(product._id),
+        emoji: u.emoji,
+      },
+    ],
+    grandTotal: Number(product.price) || 0,
   });
 
   return (

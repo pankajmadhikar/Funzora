@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { toast } from 'react-hot-toast';
 import { apiService } from '../../services/apiService';
 import { enrichProducts } from '../../utils/enrichProduct';
-import { createWhatsAppCheckoutLink } from '../../utils/whatsappCheckout';
+import { createWhatsAppCheckoutLink, resolveProductPageUrl } from '../../utils/whatsappCheckout';
 import { AGE_BUCKETS, GIFT_BUDGETS, GIFT_INTERESTS, GIFT_OCCASIONS } from '../../config/gifting';
 import ToyProductCard from './ToyProductCard';
 
@@ -19,6 +19,21 @@ export default function GiftFinderPage() {
     priceBand: '',
     interest: '',
   });
+
+  const giftWhatsAppHref = useMemo(() => {
+    const picks = result.slice(0, 3);
+    const sub = picks.reduce((s, p) => s + (Number(p.price) || 0), 0);
+    return createWhatsAppCheckoutLink({
+      cartItems: picks.map((item) => ({
+        name: item.name,
+        quantity: 1,
+        price: Number(item.price) || 0,
+        productUrl: resolveProductPageUrl(item._id),
+        emoji: item._ui?.emoji || '🎁',
+      })),
+      grandTotal: sub,
+    });
+  }, [result]);
 
   const complete = useMemo(() => Object.values(answers).every(Boolean), [answers]);
 
@@ -144,10 +159,7 @@ export default function GiftFinderPage() {
               </button>
               <a
                 className="btn btn--primary"
-                href={createWhatsAppCheckoutLink({
-                  products: result.slice(0, 3).map((item) => ({ name: item.name, quantity: 1 })),
-                  giftWrap: true,
-                })}
+                href={giftWhatsAppHref}
                 target="_blank"
                 rel="noreferrer"
               >

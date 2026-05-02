@@ -7,9 +7,15 @@ export const WHATSAPP_DEFAULT_NUMBER = "7397839266";
 export const WHATSAPP_DEFAULT_MESSAGE =
   "Hi, I want to know more about your toys";
 
-export function getWhatsappUrl() {
+/** Digits-only merchant WhatsApp (env or site default). Used for wa.me checkout + support link. */
+export function getMerchantWhatsappDigits() {
   const raw = import.meta.env.VITE_WHATSAPP_NUMBER ?? WHATSAPP_DEFAULT_NUMBER;
   const digits = String(raw).replace(/\D/g, "");
+  return digits || null;
+}
+
+export function getWhatsappUrl() {
+  const digits = getMerchantWhatsappDigits();
   if (!digits) return null;
   const message = encodeURIComponent(
     import.meta.env.VITE_WHATSAPP_MESSAGE || WHATSAPP_DEFAULT_MESSAGE,
