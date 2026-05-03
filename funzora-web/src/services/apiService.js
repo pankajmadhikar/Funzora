@@ -1,7 +1,6 @@
 import { authService } from "./authService";
 
-export const BASE_URL = 'http://localhost:8080/api/v1';
-// export const BASE_URL = "https://api.rgswholesale.in/api/v1";
+export const BASE_URL = "https://funzora.onrender.com/api/v1";
 
 const handleResponse = async (response) => {
   const data = await response.json();
@@ -67,7 +66,9 @@ export const apiService = {
 
   /** Saved delivery profile for phone identity (guest, no JWT). */
   getDeliveryAddress: async (phone) => {
-    const clean = String(phone || "").replace(/\D/g, "").slice(-10);
+    const clean = String(phone || "")
+      .replace(/\D/g, "")
+      .slice(-10);
     if (clean.length !== 10) {
       throw new Error("Phone required");
     }
@@ -79,7 +80,9 @@ export const apiService = {
   },
 
   saveDeliveryAddress: async (phone, address) => {
-    const clean = String(phone || "").replace(/\D/g, "").slice(-10);
+    const clean = String(phone || "")
+      .replace(/\D/g, "")
+      .slice(-10);
     if (clean.length !== 10) {
       throw new Error("Phone required");
     }
@@ -96,7 +99,11 @@ export const apiService = {
     try {
       const params = new URLSearchParams();
       Object.entries(filters || {}).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && String(value).trim() !== "") {
+        if (
+          value !== undefined &&
+          value !== null &&
+          String(value).trim() !== ""
+        ) {
           params.set(key, value);
         }
       });
@@ -178,7 +185,7 @@ export const apiService = {
         {
           method: "GET",
           headers: jsonHeaders,
-        }
+        },
       );
 
       const result = await handleResponse(response);
@@ -207,7 +214,7 @@ export const apiService = {
           method: "PUT",
           headers: jsonHeaders,
           body: JSON.stringify({ action, phone: clean }),
-        }
+        },
       );
 
       const result = await handleResponse(response);
@@ -235,7 +242,7 @@ export const apiService = {
         {
           method: "DELETE",
           headers: jsonHeaders,
-        }
+        },
       );
 
       const result = await handleResponse(response);
@@ -302,7 +309,7 @@ export const apiService = {
   },
 
   deleteProduct: async (productId) => {
-    console.log("productId",productId)
+    console.log("productId", productId);
     try {
       const response = await fetch(`${BASE_URL}/products/${productId}`, {
         method: "DELETE",
@@ -376,7 +383,9 @@ export const apiService = {
 
   checkout: async (phone) => {
     try {
-      const clean = String(phone || "").replace(/\D/g, "").slice(-10);
+      const clean = String(phone || "")
+        .replace(/\D/g, "")
+        .slice(-10);
       const response = await fetch(`${BASE_URL}/carts/checkout`, {
         method: "POST",
         headers: jsonHeaders,
@@ -429,7 +438,7 @@ export const apiService = {
         {
           method: "GET",
           headers: jsonHeaders,
-        }
+        },
       );
 
       const result = await handleResponse(response);
