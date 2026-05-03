@@ -11,6 +11,7 @@ import { enrichProduct, discPct } from '../../utils/enrichProduct';
 import { toggleWishlist, isInWishlist } from '../../utils/wishlistStorage';
 import { ICON_STROKE, ICON_SIZES } from '../../constants/appIconTokens';
 import { createWhatsAppCheckoutLink, resolveProductPageUrl } from '../../utils/whatsappCheckout';
+import { getMerchantWhatsappDigits } from '../../config/support';
 import { useGuestPhone } from '../../contexts/GuestPhoneContext';
 
 const fontCard = "font-['Inter',var(--font-body),sans-serif]";
@@ -137,6 +138,23 @@ export default function ToyProductCard({ product: raw, compact = false }) {
     grandTotal: Number(product.price) || 0,
   });
 
+  /** Same identity flow as Add to cart: modal + POST whatsapp-login if needed, then open store chat. */
+  const buyOnWhatsApp = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      await ensureGuestPhone({ intent: 'generic' });
+    } catch {
+      return;
+    }
+    const link = waLink;
+    if (!getMerchantWhatsappDigits() || !link || link === '#' || !link.startsWith('http')) {
+      toast.error('Store WhatsApp number is not configured.');
+      return;
+    }
+    window.open(link, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <div
       className={`group/pc flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-neutral-100 bg-white shadow-sm transition-shadow duration-200 hover:shadow-md ${fontCard}`}
@@ -227,14 +245,13 @@ export default function ToyProductCard({ product: raw, compact = false }) {
         </div>
 
         <div className="mt-3 flex flex-1 flex-col justify-end" onClick={(e) => e.stopPropagation()}>
-          <a
-            href={waLink}
-            target="_blank"
-            rel="noreferrer"
+          <button
+            type="button"
             className="mb-2 w-full rounded-xl border border-[var(--color-primary)] px-4 py-2 text-center text-sm font-semibold text-[var(--color-primary)] transition-colors hover:bg-[var(--color-primary-soft)]"
+            onClick={buyOnWhatsApp}
           >
             Buy on WhatsApp
-          </a>
+          </button>
           {!inCart ? (
             <button
               type="button"
