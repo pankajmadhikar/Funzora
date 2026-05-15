@@ -1,7 +1,7 @@
 import { authService } from "./authService";
 
-// export const BASE_URL = "https://funzora.onrender.com/api/v1";
-export const BASE_URL = "http://localhost:8080/api/v1";
+export const BASE_URL = "https://api.babyto.in/api/v1";
+// export const BASE_URL = "http://localhost:8080/api/v1";
 
 const handleResponse = async (response) => {
   const data = await response.json();
